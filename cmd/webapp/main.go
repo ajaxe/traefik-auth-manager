@@ -4,30 +4,17 @@ import (
 	"log"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/handlers"
+	"github.com/ajaxe/traefik-auth-manager/internal/pages"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
-type hello struct {
-	app.Compo
-	name string
-}
-
-func (h *hello) Render() app.UI {
-	return app.Map().Body(
-		app.H1().Text("Hello, "+h.name),
-		app.Input().Type("text").Value(h.name).OnChange(h.OnChange),
-	)
-}
-
-func (h *hello) OnChange(ctx app.Context, e app.Event) {
-	h.name = ctx.JSSrc().Get("value").String()
-	ctx.Update()
-}
-
 func main() {
-	app.Route("/", func() app.Composer { return &hello{name: "World!"} })
+	app.Route("/", func() app.Composer { return &pages.HomePage{} })
+	app.Route("/home", func() app.Composer { return &pages.HomePage{} })
+	app.Route("/users", func() app.Composer { return &pages.UsersPage{} })
+	app.Route("/apps", func() app.Composer { return &pages.AppsPage{} })
 
 	app.RunWhenOnBrowser()
 
