@@ -1,0 +1,19 @@
+.navbar {
+  padding: 8px 16px;
+}
+.bg-primary {
+  background-color: #eb6864 !important;
+}
+.side-panel {
+  height: 100vh;
+}
+
+#app-update-toast {
+  margin-top: 20px;
+  width: unset;
+}
+
+#app-update-toast .toast-body p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
