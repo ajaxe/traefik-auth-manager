@@ -5,6 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch file",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/webapp/main.go",
+      "windows": {
+        "cwd": "${workspaceFolder}/tmp"
+      },
+      "preLaunchTask": "Make build"
+    },
+    {
       "name": "Connect to server",
       "type": "go",
       "request": "attach",

@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/backend"
 	"github.com/ajaxe/traefik-auth-manager/internal/handlers"
 	"github.com/ajaxe/traefik-auth-manager/internal/pages"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -18,14 +18,13 @@ func main() {
 
 	app.RunWhenOnBrowser()
 
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e := backend.NewBackendApi()
 
 	e.GET("/*", func(c echo.Context) error {
 		handlers.GoAppHandler.ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
+
 	if err := e.Start(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
