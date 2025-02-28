@@ -17,5 +17,5 @@ Go Echo framework is used to develop the backend API server.
 When developing PWA a useful command to run to enable live reload
 
 ```bash
-wgo -xdir tmp -dir web -file .go -file .css -file .js make run
+wgo -xdir tmp -file .go -file .css -file .js make run
 ```
