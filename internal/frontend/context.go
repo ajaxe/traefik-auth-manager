@@ -1,7 +1,7 @@
 package frontend
 
 import (
-	"github.com/ajaxe/traefik-auth-manager/internal/auth"
+	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -12,12 +12,12 @@ const (
 
 type AppContext app.Context
 
-func (c AppContext) Session() auth.Session {
-	var s auth.Session
+func (c AppContext) Session() models.Session {
+	var s models.Session
 	app.Context(c).GetState(StatKeyUserSession, &s)
 	return s
 }
-func (c AppContext) SetSession(s auth.Session) AppContext {
+func (c AppContext) SetSession(s models.Session) AppContext {
 	app.Context(c).SetState(StatKeyUserSession, s)
 	return c
 }

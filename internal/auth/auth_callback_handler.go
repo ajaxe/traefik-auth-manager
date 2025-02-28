@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -59,7 +60,7 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		s, err := NewSession(userInfo)
+		s, err := models.NewSession(userInfo)
 
 		if err != nil {
 			c.Logger().Errorf("failed to create user session: %v", err)
