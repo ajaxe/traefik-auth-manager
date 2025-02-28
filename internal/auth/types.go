@@ -1,8 +1,14 @@
 package auth
 
 import (
+	"encoding/gob"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 )
+
+func init() {
+	gob.Register(&Session{})
+}
 
 type Session struct {
 	User SessionUser

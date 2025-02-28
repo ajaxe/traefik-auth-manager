@@ -12,7 +12,7 @@ func Authenticated() echo.MiddlewareFunc {
 			if err != nil {
 				c.Error(err)
 			}
-			if ok := sess.Values["isauth"].(bool); !ok {
+			if isauth, ok := sess.Values["isauth"].(bool); !ok || !isauth {
 				return echo.ErrUnauthorized
 			}
 			if err = next(c); err != nil {

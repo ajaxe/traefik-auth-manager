@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"net/http"
+
 	"github.com/ajaxe/traefik-auth-manager/internal/auth"
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/gorilla/sessions"
@@ -25,9 +27,13 @@ func NewBackendApi() *echo.Echo {
 	e.POST("/login", auth.AuthLogin(cfg))
 	e.POST(appConfig.OAuth.CallbackPath, auth.AuthCallback(cfg))
 
-	a := e.Group("/")
+	a := e.Group("/api")
 	a.Use(auth.Authenticated())
 	a.GET("/check", auth.AuthCheckSession())
+
+	e.GET("/route-list", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, e.Routes())
+	})
 
 	return e
 }
