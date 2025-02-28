@@ -1,0 +1,8 @@
+oauth:
+  client_id: test
+  client_secret: test
+  authority: test
+  callback_path: test
+  app_host_url: test
+session:
+  session_key: test
