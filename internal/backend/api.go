@@ -34,8 +34,10 @@ func NewBackendApi() *echo.Echo {
 	handlers.AddHealtcheck(e)
 
 	cfg := auth.InitAuthConfig(appConfig)
-	e.GET("/login", auth.AuthLogin(cfg)) // for testing only
+
 	e.POST("/login", auth.AuthLogin(cfg))
+	e.GET("/signout", auth.AuthSignOut(cfg))
+	e.POST("/signout", auth.AuthSignOut(cfg))
 	e.POST(appConfig.OAuth.CallbackPath, auth.AuthCallback(cfg))
 
 	a := e.Group("/api")

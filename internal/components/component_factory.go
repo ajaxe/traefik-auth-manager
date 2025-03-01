@@ -16,3 +16,6 @@ func AppNavBarItems(options NavListOptions) *NavBarItems {
 		listParent:    app.Ul().Class("navbar-nav"),
 	}
 }
+func AppSignoutBtn() *SignOutBtn {
+	return &SignOutBtn{}
+}

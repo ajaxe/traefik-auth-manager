@@ -41,7 +41,9 @@ func (n NavBar) navItems() app.UI {
 			AppNavBarItems(NavListOptions{
 				TextColor: "text-white",
 				ListCSS:   "navbar-nav me-auto mb-2 mb-lg-0",
-			}))
+			}),
+			AppSignoutBtn(),
+		)
 }
 func (n NavBar) navToggler() app.UI {
 	return app.Button().
