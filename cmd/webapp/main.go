@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/ajaxe/traefik-auth-manager/internal/backend"
 	"github.com/ajaxe/traefik-auth-manager/internal/handlers"
 	"github.com/ajaxe/traefik-auth-manager/internal/pages"

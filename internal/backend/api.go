@@ -10,6 +10,7 @@ import (
 
 	"github.com/ajaxe/traefik-auth-manager/internal/auth"
 	"github.com/ajaxe/traefik-auth-manager/internal/db"
+	"github.com/ajaxe/traefik-auth-manager/internal/handlers"
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -29,6 +30,8 @@ func NewBackendApi() *echo.Echo {
 
 	e.Use(session.Middleware(
 		sessions.NewCookieStore([]byte(appConfig.Session.SessionKey))))
+
+	handlers.AddHealtcheck(e)
 
 	cfg := auth.InitAuthConfig(appConfig)
 	e.GET("/login", auth.AuthLogin(cfg)) // for testing only
