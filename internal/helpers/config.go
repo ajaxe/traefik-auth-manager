@@ -10,6 +10,9 @@ import (
 )
 
 type AppConfig struct {
+	Server struct {
+		Port string  `mapstructure:"port"`
+	} `mapstructure:"server"`
 	OAuth struct {
 		Authority    string `mapstructure:"authority"`
 		ClientID     string `mapstructure:"client_id"`
@@ -20,6 +23,9 @@ type AppConfig struct {
 	Session struct {
 		SessionKey string `mapstructure:"session_key"`
 	} `mapstructure:"session"`
+	Database struct {
+		ConnectionURI string `mapstructure:"connection_uri"`
+	} `mapstructure:"database"`
 }
 
 func (a AppConfig) OAuthRedirectURL() string {
