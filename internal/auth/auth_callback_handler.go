@@ -77,6 +77,7 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			Path:     "/",
 			MaxAge:   0,
 			HttpOnly: true,
+			Secure: true,
 		}
 
 		tokenSess.Values["isauth"] = true

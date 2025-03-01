@@ -11,7 +11,9 @@ import (
 
 type AppConfig struct {
 	Server struct {
-		Port string  `mapstructure:"port"`
+		Port     string `mapstructure:"port"`
+		CertFile string `mapstructure:"cert_file"`
+		KeyFile  string `mapstructure:"key_file"`
 	} `mapstructure:"server"`
 	OAuth struct {
 		Authority    string `mapstructure:"authority"`
@@ -34,6 +36,10 @@ func (a AppConfig) OAuthRedirectURL() string {
 		log.Fatalf("invalid oauth config: %v", err)
 	}
 	return p
+}
+
+func (a AppConfig) UseTLS() bool {
+	return a.Server.CertFile != "" && a.Server.KeyFile != ""
 }
 
 func MustLoadDefaultAppConfig() (config AppConfig) {

@@ -58,7 +58,15 @@ func Start(e *echo.Echo) {
 	defer stop()
 	// Start server
 	go func() {
-		if err := e.Start(addr); err != nil && err != http.ErrServerClosed {
+		var err error
+		if cfg.UseTLS() {
+			e.Logger.Info("starting server with tls")
+			err = e.StartTLS(addr, cfg.Server.CertFile, cfg.Server.KeyFile)
+		} else {
+			e.Logger.Info("starting server without tls")
+			err = e.Start(addr)
+		}
+		if err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatalf("shutting down the server: %v", err)
 		}
 	}()
