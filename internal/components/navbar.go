@@ -22,9 +22,14 @@ func (n *NavBar) Render() app.UI {
 				Body(
 					n.brandName(),
 					app.If(n.authenticated, func() app.UI {
+						return AppLoginAvatar("d-lg-none")
+					}),
+					app.If(n.authenticated, func() app.UI {
 						return n.navToggler()
 					}), app.If(n.authenticated, func() app.UI {
 						return n.navItems()
+					}), app.If(n.authenticated, func() app.UI {
+						return AppLoginAvatar("d-none d-lg-block")
 					}),
 				),
 		)
@@ -35,7 +40,7 @@ func (n NavBar) brandName() app.UI {
 }
 func (n NavBar) navItems() app.UI {
 	return app.Div().
-		Class("collapse navbar-collapse").
+		Class("collapse navbar-collapse me-2").
 		ID("navbarSupportedContent").
 		Body(
 			AppNavBarItems(NavListOptions{
@@ -47,7 +52,7 @@ func (n NavBar) navItems() app.UI {
 }
 func (n NavBar) navToggler() app.UI {
 	return app.Button().
-		Class("navbar-toggler").
+		Class("navbar-toggler ms-2").
 		Class("collapsed").
 		Type("button").
 		DataSet("bs-toggle", "collapse").

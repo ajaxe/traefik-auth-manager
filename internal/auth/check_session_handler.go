@@ -38,9 +38,7 @@ func AuthCheckSession() echo.HandlerFunc {
 			return
 		}
 
-		err = c.JSON(http.StatusOK, map[string]string{
-			"sessionId": s,
-		})
+		err = c.JSON(http.StatusOK, existing)
 		return
 	}
 }

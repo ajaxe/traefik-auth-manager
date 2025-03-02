@@ -8,7 +8,7 @@ type AppName struct {
 
 func (l *AppName) Render() app.UI {
 	return app.A().
-		Class("navbar-brand").
+		Class("navbar-brand me-auto pe-3 text-uppercase").
 		Href("#").
 		Text("Proxy Auth Manager")
 }

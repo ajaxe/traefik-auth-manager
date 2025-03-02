@@ -19,3 +19,8 @@ func AppNavBarItems(options NavListOptions) *NavBarItems {
 func AppSignoutBtn() *SignOutBtn {
 	return &SignOutBtn{}
 }
+func AppLoginAvatar(css string) *LoginAvatar {
+	return &LoginAvatar{
+		displayCss: css,
+	}
+}
