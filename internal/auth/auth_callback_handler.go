@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/db"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/sessions"
@@ -49,7 +50,7 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			return echo.ErrBadRequest
 		}
 
-		err = validateIDToken(token, c, sess, cfg)
+		idtoken, err := validatedIDToken(token, c, sess, cfg)
 		if err != nil {
 			return err
 		}
@@ -77,11 +78,19 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			Path:     "/",
 			MaxAge:   0,
 			HttpOnly: true,
-			Secure: true,
+			Secure:   true,
+		}
+
+		id, err := db.InsertSession(s)
+		if err != nil {
+			c.Logger().Errorf("failed to create db user session: %v", err)
+			return echo.ErrInternalServerError
 		}
 
 		tokenSess.Values["isauth"] = true
-		tokenSess.Values[userSessionKey] = s
+		tokenSess.Values[keyUserSession] = id
+		tokenSess.Values[keyIDToken] = idtoken
+
 		err = tokenSess.Save(c.Request(), c.Response())
 		if err != nil {
 			return err
@@ -91,9 +100,9 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 	}
 }
 
-func validateIDToken(token *oauth2.Token, c echo.Context,
+func validatedIDToken(token *oauth2.Token, c echo.Context,
 	store *sessions.Session,
-	cfg appOAuthConfig) error {
+	cfg appOAuthConfig) (rawIDToken string, err error) {
 
 	verifier := cfg.provider.Verifier(&oidc.Config{
 		ClientID: cfg.config.ClientID,
@@ -102,22 +111,24 @@ func validateIDToken(token *oauth2.Token, c echo.Context,
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		c.Logger().Error("no id_token field in oauth2 token.")
-		return echo.ErrInternalServerError
+		err = echo.ErrInternalServerError
+		return
 	}
 	idToken, err := verifier.Verify(cfg.context, rawIDToken)
 	if err != nil {
 		c.Logger().Errorf("failed to verify id_token: %v", err)
-		return echo.ErrInternalServerError
+		err = echo.ErrInternalServerError
+		return
 	}
 
 	nonce, ok := store.Values["nonce"].(string)
 	if !ok {
 		c.Logger().Error("nonce not found")
-		return echo.ErrBadRequest
+		err = echo.ErrBadRequest
 	}
 	if idToken.Nonce != nonce {
 		c.Logger().Error("id_token nonce did not match")
-		return echo.ErrBadRequest
+		err = echo.ErrBadRequest
 	}
-	return nil
+	return
 }

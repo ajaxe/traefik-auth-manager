@@ -3,9 +3,11 @@ package auth
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 )
 
@@ -17,13 +19,15 @@ type appOAuthConfig struct {
 }
 
 const (
-	tokenNonce     = "nonce"
-	tokenState     = "state"
-	tokenVerifier  = "verifier"
-	sessionAuthSeq = "auth-seq"
+	tokenNonce       = "nonce"
+	tokenState       = "state"
+	tokenVerifier    = "verifier"
+	sessionAuthSeq   = "auth-seq"
+	sessionLogoutSeq = "logout-seq"
 	// gorrilla session token name
 	sessionToken   = "session-token"
-	userSessionKey = "user-session"
+	keyUserSession = "user-session"
+	keyIDToken     = "idtoken"
 )
 
 func InitAuthConfig(appConfig helpers.AppConfig) appOAuthConfig {
@@ -38,7 +42,7 @@ func InitAuthConfig(appConfig helpers.AppConfig) appOAuthConfig {
 		ClientID:     appConfig.OAuth.ClientID,
 		ClientSecret: appConfig.OAuth.ClientSecret,
 		Endpoint:     oidcProvider.Endpoint(),
-		RedirectURL:  appConfig.OAuthRedirectURL(),
+		RedirectURL:  appConfig.OAuthLoginRedirectURL(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
@@ -48,4 +52,8 @@ func InitAuthConfig(appConfig helpers.AppConfig) appOAuthConfig {
 		oauthCtx,
 		&appConfig,
 	}
+}
+
+func RedirectToHome(c echo.Context) error {
+	return c.Redirect(http.StatusFound, "/home")
 }

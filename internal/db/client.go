@@ -14,6 +14,7 @@ import (
 
 var clientInstance struct {
 	Client *mongo.Client
+	DbName string
 }
 
 func NewClient() (*mongo.Client, error) {
@@ -42,6 +43,7 @@ func NewClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
 	}
 
 	clientInstance.Client = client
+	clientInstance.DbName = c.Database.DbName
 
 	return client, nil
 }

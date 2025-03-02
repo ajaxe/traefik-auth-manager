@@ -16,22 +16,31 @@ type AppConfig struct {
 		KeyFile  string `mapstructure:"key_file"`
 	} `mapstructure:"server"`
 	OAuth struct {
-		Authority    string `mapstructure:"authority"`
-		ClientID     string `mapstructure:"client_id"`
-		ClientSecret string `mapstructure:"client_secret"`
-		CallbackPath string `mapstructure:"callback_path"`
-		AppHostURL   string `mapstructure:"app_host_url"`
+		Authority           string `mapstructure:"authority"`
+		ClientID            string `mapstructure:"client_id"`
+		ClientSecret        string `mapstructure:"client_secret"`
+		CallbackPath        string `mapstructure:"callback_path"`
+		SignOutCallbackPath string `mapstructure:"signout_callback_path"`
+		AppHostURL          string `mapstructure:"app_host_url"`
 	} `mapstructure:"oauth"`
 	Session struct {
 		SessionKey string `mapstructure:"session_key"`
 	} `mapstructure:"session"`
 	Database struct {
 		ConnectionURI string `mapstructure:"connection_uri"`
+		DbName        string `mapstructure:"db_name"`
 	} `mapstructure:"database"`
 }
 
-func (a AppConfig) OAuthRedirectURL() string {
+func (a AppConfig) OAuthLoginRedirectURL() string {
 	p, err := url.JoinPath(a.OAuth.AppHostURL, a.OAuth.CallbackPath)
+	if err != nil {
+		log.Fatalf("invalid oauth config: %v", err)
+	}
+	return p
+}
+func (a AppConfig) OAuthSignOutRedirectURL() string {
+	p, err := url.JoinPath(a.OAuth.AppHostURL, a.OAuth.SignOutCallbackPath)
 	if err != nil {
 		log.Fatalf("invalid oauth config: %v", err)
 	}

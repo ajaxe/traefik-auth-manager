@@ -1,8 +1,16 @@
+server:
+  port: 8080
+  cert_file: test
+  key_file: test
 oauth:
-  client_id: test
+  client_id: local_auth_manager
   client_secret: test
   authority: test
-  callback_path: test
-  app_host_url: test
+  callback_path: /auth/login/callback
+  signout_callback_path: /auth/logout/callback
+  app_host_url: https://localhost:8080
 session:
   session_key: test
+database:
+  connection_uri: test
+  db_name: test
