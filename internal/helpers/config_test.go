@@ -1,11 +1,19 @@
 package helpers
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestLoadConfig(t *testing.T) {
+	os.Setenv("APP_SERVER_PORT", "8000")
+
 	c, err := LoadAppConfig(".", "test_config")
 	if err != nil {
 		t.Fatalf("config load failed: %v", err)
+	}
+	if c.Server.Port != "8000" {
+		t.Fatalf("failed to read server port: expect: '8000', got: '%v'", c.Server.Port)
 	}
 	if c.OAuth.ClientID != "local_auth_manager" {
 		t.Fatalf("failed to read client_id: expect: 'local_auth_manager', got: '%v'", c.OAuth.ClientID)

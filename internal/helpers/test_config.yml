@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: -1
   cert_file: test
   key_file: test
 oauth:

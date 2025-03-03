@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -60,9 +61,12 @@ func MustLoadDefaultAppConfig() (config AppConfig) {
 }
 
 func LoadAppConfig(path, name string) (config AppConfig, err error) {
+	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
+
 	viper.AddConfigPath(path)
 	viper.SetConfigName(name)
-	viper.SetEnvPrefix("app_")
+	viper.SetEnvPrefix("app")
+
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()

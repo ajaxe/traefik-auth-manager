@@ -25,4 +25,4 @@ go.work.sum
 .env
 tmp/
 # config file for the go app server.
-config.yaml
+config*.yaml

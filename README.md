@@ -19,3 +19,11 @@ When developing PWA a useful command to run to enable live reload
 ```bash
 wgo -xdir tmp -file .go -file .css -file .js make run
 ```
+
+## Build
+
+Use following command to build the docker image
+
+```sh
+docker build . --network=host --tag apogee-dev/traefik-auth-manager:local
+```
