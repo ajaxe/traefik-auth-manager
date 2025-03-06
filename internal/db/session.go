@@ -7,10 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-const (
-	collectionSession = "session"
-)
-
 func InsertSession(s models.Session) (id string, err error) {
 	c, err := NewClient()
 	if err != nil {

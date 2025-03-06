@@ -12,6 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
+const (
+	collectionAppUser = "app_users"
+	collectionSession = "session"
+)
+const (
+	readTimeout = 30 * time.Second
+)
+
 var clientInstance struct {
 	Client *mongo.Client
 	DbName string

@@ -36,7 +36,6 @@ func NewBackendApi() *echo.Echo {
 	cfg := auth.InitAuthConfig(appConfig)
 
 	e.POST("/login", auth.AuthLogin(cfg))
-	e.GET("/signout", auth.AuthSignOut(cfg))
 	e.POST("/signout", auth.AuthSignOut(cfg))
 	e.POST(appConfig.OAuth.CallbackPath, auth.AuthCallback(cfg))
 	e.GET(appConfig.OAuth.SignOutCallbackPath, auth.AuthSignOutCallback(cfg))
