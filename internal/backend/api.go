@@ -44,6 +44,8 @@ func NewBackendApi() *echo.Echo {
 	a.Use(auth.Authenticated())
 	a.GET("/check", auth.AuthCheckSession())
 
+	handlers.AddAppUserHandlers(a)
+
 	e.GET("/route-list", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, e.Routes())
 	})

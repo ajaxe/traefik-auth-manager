@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	collectionAppUser = "app_users"
-	collectionSession = "session"
+	collectionAppUser    = "app_users"
+	collectionSession    = "session"
+	collectionHostedApps = "hosted_applications"
 )
 const (
 	readTimeout = 30 * time.Second

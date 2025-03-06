@@ -26,4 +26,10 @@ func Test_Integration_Read_AppUsers(t *testing.T) {
 	if len(u) <= 0 {
 		t.Fatalf("invalid number of %s records", collectionAppUser)
 	}
+
+	for _, v := range u {
+		if v.ID.Hex() == "" {
+			t.Fatalf("invalid record ID")
+		}
+	}
 }
