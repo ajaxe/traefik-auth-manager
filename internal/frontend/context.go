@@ -1,6 +1,9 @@
 package frontend
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -29,4 +32,7 @@ func (c AppContext) IsAuth() bool {
 	var a bool
 	app.Context(c).GetState(StateKeyIsAuth, &a)
 	return a
+}
+func buildApiURL(b, p string) string {
+	return fmt.Sprintf("%s/api/%s", strings.TrimSuffix(b, "/"), strings.TrimPrefix(p, "/"))
 }

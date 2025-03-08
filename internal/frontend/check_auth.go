@@ -11,7 +11,7 @@ import (
 
 func CheckAuth(u string) (models.Session, error) {
 	var s models.Session
-	err := httpGet(fmt.Sprintf("%s/api/check", u), &s)
+	err := httpGet(buildApiURL(u, "/check"), &s)
 
 	if err != nil {
 		return models.Session{}, err

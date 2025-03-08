@@ -24,3 +24,6 @@ func AppLoginAvatar(css string) *LoginAvatar {
 		displayCss: css,
 	}
 }
+func AppUserList() *UserList {
+	return &UserList{}
+}
