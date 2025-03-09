@@ -27,3 +27,6 @@ func AppLoginAvatar(css string) *LoginAvatar {
 func AppUserList() *UserList {
 	return &UserList{}
 }
+func AppUserEditModal() *UserEditModal {
+	return &UserEditModal{}
+}

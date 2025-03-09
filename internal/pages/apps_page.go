@@ -10,6 +10,6 @@ type AppsPage struct {
 
 func (h *AppsPage) Render() app.UI {
 	return &MainLayout{
-		Content: app.Div().Text("Applications"),
+		Content: []app.UI{app.Div().Text("Applications")},
 	}
 }

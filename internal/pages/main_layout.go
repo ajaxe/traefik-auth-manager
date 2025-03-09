@@ -8,7 +8,7 @@ import (
 
 type MainLayout struct {
 	app.Compo
-	Content app.UI
+	Content []app.UI
 }
 
 func (m *MainLayout) Render() app.UI {
@@ -44,7 +44,7 @@ func (m *MainLayout) container() app.UI {
 			app.Div().Class("container mt-3").
 				ID("main-container").
 				Body(
-					m.Content,
+					m.Content...,
 				),
 			components.AppCodeUpdate(),
 		)

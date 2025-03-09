@@ -11,10 +11,13 @@ type UsersPage struct {
 
 func (h *UsersPage) Render() app.UI {
 	return &MainLayout{
-		Content: app.Div().Class("row justify-content-center").Body(
-			app.Div().Class("col col-md-10 col-lg-8 col-xl-6").Body(
-				components.AppUserList(),
+		Content: []app.UI{
+			app.Div().Class("row justify-content-center").Body(
+				app.Div().Class("col col-md-10 col-lg-8 col-xl-6").Body(
+					components.AppUserList(),
+				),
 			),
-		),
+			components.AppUserEditModal(),
+		},
 	}
 }

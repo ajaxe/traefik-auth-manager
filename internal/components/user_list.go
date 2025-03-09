@@ -87,6 +87,9 @@ func (u *UserListItemEdit) Render() app.UI {
 		Body(
 			app.Button().Class("btn btn-light").
 				DataSet("user-id", u.user.ID.String()).
+				OnClick(func(ctx app.Context, e app.Event){
+					ctx.NewActionWithValue(actionUserEdit, u.user)
+				}).
 				Body(
 					app.I().Class("bi bi-pencil-square"),
 				),

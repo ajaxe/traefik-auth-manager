@@ -34,6 +34,6 @@ func AppLogf(format string, v ...interface{}) {
 	// It is a wrapper around app.Log.
 	// It accepts a format string and a variadic number of arguments.
 	// It returns nothing.
-	token := fmt.Sprintf("[%s] ", time.Now())
+	token := fmt.Sprintf("[%s] ", time.Now().Format(time.RFC3339))
 	app.Logf(token+format, v...)
 }
