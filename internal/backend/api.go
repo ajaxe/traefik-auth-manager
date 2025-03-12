@@ -24,6 +24,7 @@ func NewBackendApi() *echo.Echo {
 
 	e := echo.New()
 	e.Logger.SetLevel(elog.INFO)
+	e.HTTPErrorHandler = handlers.AppErrorHandler()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -44,7 +45,7 @@ func NewBackendApi() *echo.Echo {
 	a.Use(auth.Authenticated())
 	a.GET("/check", auth.AuthCheckSession())
 
-	handlers.AddAppUserHandlers(a)
+	handlers.AddAppUserHandlers(a, e.Logger)
 
 	handlers.AddHostedAppHandlers(a)
 
