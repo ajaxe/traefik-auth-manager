@@ -49,7 +49,9 @@ func (h *appUserHandler) UpdateUser() echo.HandlerFunc {
 			return err
 		}
 
-		return c.NoContent(http.StatusNoContent)
+		return c.JSON(http.StatusOK, &models.ApiResult{
+			Success: true,
+		})
 	}
 }
 

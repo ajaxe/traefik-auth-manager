@@ -10,6 +10,9 @@ import (
 
 func AppErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
+		if c.Response().Committed {
+			return
+		}
 		c.Logger().Errorf("error: %v", err)
 		st := http.StatusInternalServerError
 		m := err.Error()

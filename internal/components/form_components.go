@@ -15,9 +15,11 @@ func (l *FormLabel) Render() app.UI {
 
 type FormText struct {
 	app.Compo
-	ID       string
-	Value    string
-	ReadOnly bool
+	ID        string
+	Value     string
+	ReadOnly  bool
+	BindTo    any
+	InputType string
 }
 
 func (t *FormText) Render() app.UI {
@@ -25,13 +27,18 @@ func (t *FormText) Render() app.UI {
 	if t.ReadOnly {
 		c += "-plaintext"
 	}
+	it := t.InputType
+	if it == "" {
+		it = "text"
+	}
 	return app.Input().
-		Type("text").
+		Type(it).
 		ReadOnly(t.ReadOnly).
 		Placeholder(t.Value).
 		Class(c).
 		ID(t.ID).
-		Value(t.Value)
+		Value(t.Value).
+		OnChange(t.ValueTo(t.BindTo))
 }
 
 type FormControl struct {

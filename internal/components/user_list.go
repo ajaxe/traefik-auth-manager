@@ -11,7 +11,7 @@ import (
 
 type UserList struct {
 	app.Compo
-	users []models.AppUser
+	users []*models.AppUser
 }
 
 func (u *UserList) OnNav(ctx app.Context) {
@@ -22,7 +22,7 @@ func (u *UserList) OnNav(ctx app.Context) {
 		d, _ := frontend.UserList(b.String())
 
 		ctx.Dispatch(func(c app.Context) {
-			u.users = d
+			u.users = d.Data
 
 			ctx.Update()
 		})
@@ -39,7 +39,7 @@ func (u *UserList) userListItems() []app.UI {
 	l := []app.UI{}
 	for _, r := range u.users {
 		l = append(l, &UserListItem{
-			user: &r,
+			user: r,
 		})
 	}
 	return l
