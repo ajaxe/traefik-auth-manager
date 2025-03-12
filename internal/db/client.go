@@ -18,7 +18,8 @@ const (
 	collectionHostedApps = "hosted_applications"
 )
 const (
-	readTimeout = 30 * time.Second
+	readTimeout  = 30 * time.Second
+	writeTimeout = 30 * time.Second
 )
 
 var clientInstance struct {

@@ -36,3 +36,4 @@ func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
 
 	return
 }
+
