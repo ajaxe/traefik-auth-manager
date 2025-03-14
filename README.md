@@ -24,6 +24,7 @@ wgo -xdir tmp -file .go -file .css -file .js make run
 
 Use following command to build the docker image
 
-```sh
+```pwsh
+$env:DOCKER_BUILDKIT=1;
 docker build . --network=host --tag apogee-dev/traefik-auth-manager:local
 ```
