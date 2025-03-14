@@ -6,9 +6,18 @@ RUN mkdir -p $InstallFolder
 
 WORKDIR $InstallFolder
 
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
 COPY . .
 
-RUN GOARCH=wasm GOOS=js go build -o ./tmp/web/app.wasm ./cmd/webapp \
+ENV GOCACHE=/root/.cache/go-build
+
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    --mount=type=cache,target="/root/.cache/go-build" \
+    --mount=type=bind,target=. \
+    GOARCH=wasm GOOS=js go build -o ./tmp/web/app.wasm ./cmd/webapp \
     && go build -o ./tmp/server ./cmd/webapp/ \
     && cp -a ./web/* ./tmp/web/
 
