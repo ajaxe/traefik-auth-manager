@@ -9,3 +9,7 @@ type HostedApplication struct {
 	ServiceURL   string        `json:"serviceUrl"`
 	Active       bool          `json:"active"`
 }
+type HostedAppListResult struct {
+	ApiResult
+	Data []*HostedApplication `json:"data"`
+}
