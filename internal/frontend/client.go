@@ -31,12 +31,19 @@ func httpPost(u string, payload, response interface{}) error {
 func httpPut(u string, payload, response interface{}) error {
 	return httpWithPayload(http.MethodPut, u, payload, response)
 }
+func httpDelete(u string, response interface{}) error {
+	return httpWithPayload(http.MethodDelete, u, nil, response)
+}
 
 func httpWithPayload(method, u string, payload, response interface{}) error {
-	v, err := json.Marshal(payload)
-	buf := bytes.NewBuffer(v)
-	if err != nil {
-		return err
+	buf := bytes.NewBuffer([]byte{})
+
+	if payload != nil {
+		v, err := json.Marshal(payload)
+		buf = bytes.NewBuffer(v)
+		if err != nil {
+			return err
+		}
 	}
 
 	req, err := http.NewRequest(method, u, buf)

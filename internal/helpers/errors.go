@@ -7,7 +7,10 @@ import (
 )
 
 var ErrAppBadID = NewAppError(http.StatusBadRequest, "Invalid ID.", nil)
-var ErrAppGeneric = NewAppError(http.StatusInternalServerError, "Something went wrong.", nil)
+
+func ErrAppGeneric(err error) *AppError {
+	return NewAppError(http.StatusInternalServerError, "Something went wrong.", err)
+}
 
 func NewAppError(status int, message string, e error) *AppError {
 	return &AppError{

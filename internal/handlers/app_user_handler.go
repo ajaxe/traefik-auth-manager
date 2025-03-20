@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/db"
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
@@ -20,8 +22,13 @@ func AddAppUserHandlers(e *echo.Group, l echo.Logger) {
 	}
 	e.GET("/app-users", h.Users())
 	e.POST("/app-users", h.CreateUser())
-	e.PUT("/app-users/:id", h.UpdateUser())
-	e.DELETE("/app-users/:id", h.DeleteUser())
+	e.PUT(fmt.Sprintf("/app-users/%s", idParam.Param()), h.UpdateUser(idParam))
+	e.DELETE(fmt.Sprintf("/app-users/%s", idParam.Param()), h.DeleteUser())
+
+	e.DELETE(fmt.Sprintf("/app-users/%s/hosted-app/%s", idParam.Param(), appIDParam.Param()),
+		h.removeUserApp(idParam, appIDParam))
+	e.PUT(fmt.Sprintf("/app-users/%s/hosted-app/%s", idParam.Param(), appIDParam.Param()),
+		h.assignUserApp(idParam, appIDParam))
 }
 
 func (h *appUserHandler) CreateUser() echo.HandlerFunc {
@@ -30,9 +37,9 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 	}
 }
 
-func (h *appUserHandler) UpdateUser() echo.HandlerFunc {
+func (h *appUserHandler) UpdateUser(id apiParam) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		i := c.Param("id")
+		i := c.Param(id.String())
 
 		id, err := bson.ObjectIDFromHex(i)
 		if err != nil {
@@ -97,6 +104,7 @@ func (h *appUserHandler) userApps() (u []*models.AppUser, err error) {
 	}
 	return
 }
+
 func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
 
 	if d.Password == "" {
@@ -108,8 +116,7 @@ func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
 	hash, err := helpers.GenerateHashUsingBase64URL(d.Password)
 
 	if err != nil {
-		h.logger.Errorf("error generating hash: %v", err)
-		return helpers.ErrAppGeneric
+		return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
 	}
 
 	err = db.UpdatePassword(&models.AppUser{
@@ -118,9 +125,90 @@ func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
 	})
 
 	if err != nil {
-		h.logger.Errorf("error saving password: %v", err)
-		return helpers.ErrAppGeneric
+		return helpers.ErrAppGeneric(fmt.Errorf("error saving password: %v", err))
 	}
 
 	return nil
+}
+
+func (h *appUserHandler) removeUserApp(idParam, appIdParam apiParam) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param(idParam.String())
+		appId := c.Param(appIdParam.String())
+
+		if id == "" {
+			return helpers.NewAppError(http.StatusBadRequest, "Invalid user id", nil)
+		}
+
+		if appId == "" {
+			return helpers.NewAppError(http.StatusBadRequest, "Invalid app id", nil)
+		}
+
+		existing, err := db.AppUserByID(id)
+		if err != nil || existing == nil {
+			return helpers.NewAppError(http.StatusBadRequest, "User does not exist", err)
+		}
+
+		for i := range existing.Applications {
+			if existing.Applications[i].HostAppId.Hex() == appId {
+				existing.Applications = slices.Delete(existing.Applications, i, i+1)
+				break
+			}
+		}
+
+		err = db.UpdateUserHostedApps(existing)
+		if err != nil {
+			return helpers.ErrAppGeneric(fmt.Errorf("error updating user app: %v", err))
+		}
+
+		return c.JSON(http.StatusOK, &models.ApiResult{
+			Success: true,
+		})
+	}
+}
+func (h *appUserHandler) assignUserApp(idParam, appIdParam apiParam) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param(idParam.String())
+		appId := c.Param(appIdParam.String())
+
+		if id == "" {
+			return helpers.NewAppError(http.StatusBadRequest, "Invalid user id", nil)
+		}
+
+		if appId == "" {
+			return helpers.NewAppError(http.StatusBadRequest, "Invalid app id", nil)
+		}
+
+		existing, err := db.AppUserByID(id)
+		if err != nil || existing == nil {
+			return helpers.NewAppError(http.StatusBadRequest, "User does not exist", err)
+		}
+
+		has := false
+		for i := range existing.Applications {
+			if existing.Applications[i].HostAppId.Hex() == appId {
+				has = true
+				break
+			}
+		}
+
+		if !has {
+			h, err := db.HostedApplicationByID(appId)
+			if h == nil || err != nil {
+				return helpers.ErrAppGeneric(fmt.Errorf("non-existing hosted app: %s: %v", appId, err))
+			}
+
+			existing.Applications = append(existing.Applications,
+				&models.ApplicationIdentifier{HostAppId: h.ID})
+
+			err = db.UpdateUserHostedApps(existing)
+			if err != nil {
+				return helpers.ErrAppGeneric(fmt.Errorf("error updating user app: %v", err))
+			}
+		}
+
+		return c.JSON(http.StatusOK, &models.ApiResult{
+			Success: true,
+		})
+	}
 }

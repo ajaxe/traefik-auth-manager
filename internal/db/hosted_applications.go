@@ -1,6 +1,11 @@
 package db
 
-import "github.com/ajaxe/traefik-auth-manager/internal/models"
+import (
+	"context"
+
+	"github.com/ajaxe/traefik-auth-manager/internal/models"
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 func HostedApplications() (d []*models.HostedApplication, err error) {
 	var fn dbValFunc = func() any { return &models.HostedApplication{} }
@@ -11,6 +16,28 @@ func HostedApplications() (d []*models.HostedApplication, err error) {
 	for i, v := range r {
 		d[i] = v.(*models.HostedApplication)
 	}
+
+	return
+}
+func HostedApplicationByID(id string) (s *models.HostedApplication, err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	hex, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"_id", hex}}
+	res := c.Database(clientInstance.DbName).
+		Collection(collectionHostedApps).
+		FindOne(context.TODO(), f)
+
+	s = &models.HostedApplication{}
+
+	err = res.Decode(s)
 
 	return
 }

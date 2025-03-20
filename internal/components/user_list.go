@@ -87,7 +87,12 @@ func (ul *UserListItem) Render() app.UI {
 								),
 							&UserListItemEdit{user: ul.user},
 						),
-					&UserAppAssignment{userApps: ul.user.Applications, ID: i, allApps: ul.allApps},
+					&UserAppAssignment{
+						userApps: ul.user.Applications,
+						ID:       i,
+						allApps:  ul.allApps,
+						userId:   ul.user.ID.Hex(),
+					},
 				),
 		)
 }

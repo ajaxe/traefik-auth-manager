@@ -19,6 +19,28 @@ func AppUsers() (d []*models.AppUser, err error) {
 
 	return
 }
+func AppUserByID(id string) (s *models.AppUser, err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	hex, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"_id", hex}}
+	res := c.Database(clientInstance.DbName).
+		Collection(collectionAppUser).
+		FindOne(context.TODO(), f)
+
+	s = &models.AppUser{}
+
+	err = res.Decode(s)
+
+	return
+}
 
 func UpdatePassword(u *models.AppUser) (err error) {
 	c, err := NewClient()
@@ -31,6 +53,24 @@ func UpdatePassword(u *models.AppUser) (err error) {
 	defer cancel()
 
 	update := bson.D{{"$set", bson.D{{"Password", u.Password}}}}
+
+	_, err = c.Database(clientInstance.DbName).
+		Collection(collectionAppUser).
+		UpdateOne(ctx, f, update)
+
+	return
+}
+func UpdateUserHostedApps(u *models.AppUser) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"_id", u.ID}}
+	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	defer cancel()
+
+	update := bson.D{{"$set", bson.D{{"Applications", u.Applications}}}}
 
 	_, err = c.Database(clientInstance.DbName).
 		Collection(collectionAppUser).

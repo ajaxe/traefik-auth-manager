@@ -1,6 +1,8 @@
 package frontend
 
 import (
+	"fmt"
+
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 )
 
@@ -20,4 +22,11 @@ func PostUser(u string, payload, response interface{}) error {
 }
 func PutUser(id, u string, payload, response interface{}) error {
 	return httpPut(buildApiURL(u, "/app-users/"+id), payload, response)
+}
+func AssignUserApp(id, appId, u string, response interface{}) error {
+	return httpPut(buildApiURL(u, fmt.Sprintf("/app-users/%s/hosted-app/%s", id, appId)),
+		nil, response)
+}
+func RemoveUserApp(id, appId, u string, response interface{}) error {
+	return httpDelete(buildApiURL(u, fmt.Sprintf("/app-users/%s/hosted-app/%s", id, appId)), response)
 }
