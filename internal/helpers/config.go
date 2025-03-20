@@ -25,7 +25,8 @@ type AppConfig struct {
 		AppHostURL          string `mapstructure:"app_host_url"`
 	} `mapstructure:"oauth"`
 	Session struct {
-		SessionKey string `mapstructure:"session_key"`
+		SessionKey       string   `mapstructure:"session_key"`
+		AuthorizedEmails []string `mapstructure:"authorized_emails"`
 	} `mapstructure:"session"`
 	Database struct {
 		ConnectionURI string `mapstructure:"connection_uri"`

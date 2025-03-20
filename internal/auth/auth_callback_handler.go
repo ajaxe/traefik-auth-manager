@@ -81,6 +81,12 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			Secure:   true,
 		}
 
+		err = authorizeUser(s)
+		if err != nil {
+			c.Logger().Errorf("failed to authorize user: %v", err)
+			return c.Redirect(http.StatusFound, "/signout") //echo.ErrForbidden
+		}
+
 		id, err := db.InsertSession(s)
 		if err != nil {
 			c.Logger().Errorf("failed to create db user session: %v", err)
@@ -130,5 +136,6 @@ func validatedIDToken(token *oauth2.Token, c echo.Context,
 		c.Logger().Error("id_token nonce did not match")
 		err = echo.ErrBadRequest
 	}
+
 	return
 }

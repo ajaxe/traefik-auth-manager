@@ -35,11 +35,14 @@ func AuthSignOut(cfg appOAuthConfig) echo.HandlerFunc {
 			return
 		}
 
-		id := sess.Values[keyUserSession].(string)
-		err = db.DeleteSessionByID(id)
+		id, ok := sess.Values[keyUserSession].(string)
 
-		if err != nil {
-			return
+		if ok {
+			err = db.DeleteSessionByID(id)
+
+			if err != nil {
+				return
+			}
 		}
 
 		return c.Redirect(http.StatusFound, u)
