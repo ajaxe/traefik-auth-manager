@@ -33,7 +33,37 @@ func AddAppUserHandlers(e *echo.Group, l echo.Logger) {
 
 func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNoContent)
+		u := &models.AppUserChange{}
+		if err := c.Bind(u); err != nil {
+			return helpers.NewAppError(http.StatusBadRequest, "Bad data.", nil)
+		}
+
+		if u.UserName == "" {
+			return helpers.NewAppError(http.StatusBadRequest, "username is required.", nil)
+		}
+
+		err := h.validatePassword(u.Password, u.ConfirmPassword)
+		if err != nil {
+			return err
+		}
+
+		hash, err := helpers.GenerateHashUsingBase64URL(u.Password)
+		if err != nil {
+			return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
+		}
+
+		err = db.InsertAppUser(&models.AppUser{
+			UserName: u.UserName,
+			Password: hash,
+			Active:   true,
+		})
+		if err != nil {
+			return helpers.ErrAppGeneric(fmt.Errorf("error saving user: %v", err))
+		}
+
+		return c.JSON(http.StatusOK, &models.ApiResult{
+			Success: true,
+		})
 	}
 }
 
@@ -107,12 +137,11 @@ func (h *appUserHandler) userApps() (u []*models.AppUser, err error) {
 
 func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
 
-	if d.Password == "" {
-		return helpers.NewAppError(http.StatusBadRequest, "Password is required", nil)
+	err := h.validatePassword(d.Password, d.ConfirmPassword)
+	if err != nil {
+		return err
 	}
-	if d.Password != d.ConfirmPassword {
-		return helpers.NewAppError(http.StatusBadRequest, "Passwords do not match.", nil)
-	}
+
 	hash, err := helpers.GenerateHashUsingBase64URL(d.Password)
 
 	if err != nil {
@@ -211,4 +240,15 @@ func (h *appUserHandler) assignUserApp(idParam, appIdParam apiParam) echo.Handle
 			Success: true,
 		})
 	}
+}
+
+func (h *appUserHandler) validatePassword(pwd, cpwd string) error {
+	if pwd == "" {
+		return helpers.NewAppError(http.StatusBadRequest, "Password is required", nil)
+	}
+	if cpwd != "" && pwd != cpwd {
+		return helpers.NewAppError(http.StatusBadRequest, "Passwords do not match.", nil)
+	}
+
+	return nil
 }

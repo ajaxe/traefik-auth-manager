@@ -88,6 +88,7 @@ func (u *UserEditModal) username() app.UI {
 				&FormText{
 					ID:       id,
 					Value:    u.user.UserName,
+					BindTo:   &u.user.UserName,
 					ReadOnly: ro,
 				},
 				&FormLabel{

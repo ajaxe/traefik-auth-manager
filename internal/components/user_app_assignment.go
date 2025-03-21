@@ -19,22 +19,12 @@ type UserAppAssignment struct {
 }
 
 func (u *UserAppAssignment) Render() app.UI {
-	existing := len(u.userApps) > 0
 
-	return app.If(!existing, func() app.UI {
-		return app.Div().
-			Class("collapse").
-			ID(u.ID).
-			Body(
-				app.Text("No applications assigned to this user."),
-			)
-	}).Else(func() app.UI {
-		return app.Div().
-			ID(u.ID).
-			Body(
-				u.listApps()...,
-			)
-	})
+	return app.Div().
+		ID(u.ID).
+		Body(
+			u.listApps()...,
+		)
 }
 func (u *UserAppAssignment) listApps() []app.UI {
 	l := []app.UI{}

@@ -78,3 +78,19 @@ func UpdateUserHostedApps(u *models.AppUser) (err error) {
 
 	return
 }
+
+func InsertAppUser(u *models.AppUser) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	defer cancel()
+
+	_, err = c.Database(clientInstance.DbName).
+		Collection(collectionAppUser).
+		InsertOne(ctx, u)
+
+	return
+}

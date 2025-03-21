@@ -31,14 +31,20 @@ func (t *FormText) Render() app.UI {
 	if it == "" {
 		it = "text"
 	}
-	return app.Input().
+
+	elem := app.Input().
 		Type(it).
 		ReadOnly(t.ReadOnly).
 		Placeholder(t.Value).
 		Class(c).
 		ID(t.ID).
-		Value(t.Value).
-		OnChange(t.ValueTo(t.BindTo))
+		Value(t.Value)
+
+	if !t.ReadOnly {
+		elem.OnChange(t.ValueTo(t.BindTo))
+	}
+
+	return elem
 }
 
 type FormControl struct {
