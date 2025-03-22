@@ -1,6 +1,11 @@
 package components
 
-import "github.com/maxence-charriere/go-app/v10/pkg/app"
+import (
+	"fmt"
+	"time"
+
+	"github.com/maxence-charriere/go-app/v10/pkg/app"
+)
 
 type FormLabel struct {
 	app.Compo
@@ -54,4 +59,40 @@ type FormControl struct {
 
 func (f *FormControl) Render() app.UI {
 	return app.Div().Class("form-floating mb-3").Body(f.Content()...)
+}
+
+type FormCheckbox struct {
+	app.Compo
+	role   string // empty or "switch"
+	bindTo any
+	value  bool
+	label  string
+}
+
+func (c *FormCheckbox) Render() app.UI {
+	s := ""
+	if c.role == "switch" {
+		s = "form-switch"
+	}
+
+	id := fmt.Sprintf("chk-%v", time.Now().UnixMicro())
+
+	input := app.Input().
+		Class("form-check-input").
+		Type("checkbox").
+		Value(c.value).
+		Checked(c.value).
+		ID(id)
+
+	if c.bindTo != nil {
+		input.OnChange(c.ValueTo(c.bindTo))
+	}
+
+	return app.Div().Class("form-check "+s).
+		Body(
+			input,
+			app.Label().Class("form-check-label").
+				For(id).
+				Text(c.label),
+		)
 }
