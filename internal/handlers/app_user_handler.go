@@ -10,7 +10,6 @@ import (
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type appUserHandler struct {
@@ -53,9 +52,9 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 			return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
 		}
 
-		_, err = db.AppUserByUsername(u.UserName)
-		if err != mongo.ErrNoDocuments {
-			return helpers.ErrAppGeneric(err)
+		e, _ := db.AppUserByUsername(u.UserName)
+		if e.UserName != "" { //err != mongo.ErrNoDocuments {
+			return helpers.NewAppError(http.StatusBadRequest, fmt.Sprintf("User '%s' already exists.", u.UserName), nil)
 		}
 
 		id, err := db.InsertAppUser(&models.AppUser{
