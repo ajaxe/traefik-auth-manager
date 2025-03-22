@@ -31,6 +31,17 @@ func (u *UserList) OnNav(ctx app.Context) {
 		})
 	})
 }
+func (u *UserList) OnMount(ctx app.Context) {
+	b := app.Window().URL()
+	b.Path = ""
+	ctx.Handle(actionUserListReload, func(ctx app.Context, a app.Action) {
+		d, _ := frontend.UserList(b.String())
+		h, _ := frontend.HostedAppList(b.String())
+
+		u.users = d.Data
+		u.allApps = h.Data
+	})
+}
 
 func (u *UserList) Render() app.UI {
 	return app.Div().Body(

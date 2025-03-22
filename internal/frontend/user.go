@@ -30,3 +30,6 @@ func AssignUserApp(id, appId, u string, response interface{}) error {
 func RemoveUserApp(id, appId, u string, response interface{}) error {
 	return httpDelete(buildApiURL(u, fmt.Sprintf("/app-users/%s/hosted-app/%s", id, appId)), response)
 }
+func RemoveUser(id, u string, response interface{}) error {
+	return httpDelete(buildApiURL(u, fmt.Sprintf("/app-users/%s", id)), response)
+}
