@@ -28,8 +28,6 @@ func (u *UserList) OnNav(ctx app.Context) {
 		ctx.Dispatch(func(c app.Context) {
 			u.users = d.Data
 			u.allApps = h.Data
-
-			ctx.Update()
 		})
 	})
 }
@@ -86,6 +84,7 @@ func (ul *UserListItem) Render() app.UI {
 									app.I().Class("bi bi-arrow-right ms-2"),
 								),
 							&UserListItemEdit{user: ul.user},
+							&UserDeleteBtn{user: ul.user},
 						),
 					&UserAppAssignment{
 						userApps: ul.user.Applications,
@@ -104,9 +103,9 @@ type UserListItemEdit struct {
 
 func (u *UserListItemEdit) Render() app.UI {
 	return app.Div().
+		Class("me-1").
 		Body(
 			app.Button().Class("btn btn-light").
-				DataSet("user-id", u.user.ID.String()).
 				OnClick(func(ctx app.Context, e app.Event) {
 					ctx.NewActionWithValue(actionUserEdit, u.user)
 				}).
