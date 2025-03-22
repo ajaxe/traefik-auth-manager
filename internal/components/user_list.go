@@ -84,29 +84,25 @@ type UserListItem struct {
 
 func (ul *UserListItem) Render() app.UI {
 	i := fmt.Sprintf("c%v", time.Now().UnixMilli())
-	return app.Div().Class("card").Style("margin-bottom", "10px").
-		Body(
-			app.Div().Class("card-body").
-				Body(
-					app.Div().Class("card-title d-flex").
-						Body(
-							app.Div().Class("me-auto").
-								Style("padding-top", "5px").
-								Body(
-									app.Span().Class("h5").Text(ul.user.UserName),
-									app.I().Class("bi bi-arrow-right ms-2"),
-								),
-							&UserListItemEdit{user: ul.user},
-							&UserDeleteBtn{user: ul.user},
-						),
-					&UserAppAssignment{
-						userApps: ul.user.Applications,
-						ID:       i,
-						allApps:  ul.allApps,
-						userId:   ul.user.ID.Hex(),
-					},
-				),
-		)
+	return &CardListItem{
+		title: ul.user.UserName,
+		actionItems: func() []app.UI {
+			return []app.UI{
+				&UserListItemEdit{user: ul.user},
+				&UserDeleteBtn{user: ul.user},
+			}
+		},
+		content: func() []app.UI {
+			return []app.UI{
+				&UserAppAssignment{
+					userApps: ul.user.Applications,
+					ID:       i,
+					allApps:  ul.allApps,
+					userId:   ul.user.ID.Hex(),
+				},
+			}
+		},
+	}
 }
 
 type UserListItemEdit struct {

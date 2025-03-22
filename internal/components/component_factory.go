@@ -24,9 +24,15 @@ func AppLoginAvatar(css string) *LoginAvatar {
 		displayCss: css,
 	}
 }
+func AppUserAddBtn() *UserAddBtn {
+	return &UserAddBtn{}
+}
 func AppUserList() *UserList {
 	return &UserList{}
 }
 func AppUserEditModal() *UserEditModal {
 	return &UserEditModal{}
+}
+func AppHostedAppList() * HostedAppList {
+	return &HostedAppList{}
 }
