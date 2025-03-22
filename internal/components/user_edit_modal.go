@@ -27,11 +27,15 @@ func (u *UserEditModal) OnMount(ctx app.Context) {
 
 func (u *UserEditModal) Render() app.UI {
 	helpers.AppLogf("UserEditModal render: show: %v", u.show)
+	var t string
 	if u.op == "" {
 		u.op = "edit"
+		t = "Edit User"
+	} else {
+		t = "Add New User"
 	}
 	return &Modal{
-		Title:   "Edit User",
+		Title:   t,
 		Content: u.form(),
 		Show:    u.show,
 	}
@@ -169,14 +173,16 @@ func (u *UserEditModal) formSubmit(ctx app.Context, e app.Event) {
 	b := app.Window().URL()
 	b.Path = ""
 
-	helpers.AppLogf("UserEditModal form submitted: user id: %v", u.user.ID.Hex())
-
 	var r models.ApiResult
 	var err error
+	helpers.AppLogf("u.op: %v", u.op)
 	if u.op == "edit" {
 		r, err = u.updateUser(b)
 	} else {
 		r, err = u.addUser(b)
+		if err == nil {
+			ctx.NewAction(actionUserListReload)
+		}
 	}
 
 	if err != nil {

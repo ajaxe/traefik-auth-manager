@@ -57,9 +57,6 @@ func httpWithPayload(method, u string, payload, response interface{}) error {
 	}
 	defer res.Body.Close()
 
-	/*if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error code: %v", res.StatusCode)
-	}*/
 	b, _ := io.ReadAll(res.Body)
 	err = json.Unmarshal(b, &response)
 
