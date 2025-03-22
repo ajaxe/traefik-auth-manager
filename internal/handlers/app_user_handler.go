@@ -23,7 +23,7 @@ func AddAppUserHandlers(e *echo.Group, l echo.Logger) {
 	e.GET("/app-users", h.Users())
 	e.POST("/app-users", h.CreateUser())
 	e.PUT(fmt.Sprintf("/app-users/%s", idParam.Param()), h.UpdateUser(idParam))
-	e.DELETE(fmt.Sprintf("/app-users/%s", idParam.Param()), h.DeleteUser())
+	e.DELETE(fmt.Sprintf("/app-users/%s", idParam.Param()), h.DeleteUser(idParam))
 
 	e.DELETE(fmt.Sprintf("/app-users/%s/hosted-app/%s", idParam.Param(), appIDParam.Param()),
 		h.removeUserApp(idParam, appIDParam))
@@ -39,7 +39,7 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 		}
 
 		if u.UserName == "" {
-			return helpers.NewAppError(http.StatusBadRequest, "username is required.", nil)
+			return helpers.NewAppError(http.StatusBadRequest, "Username is required.", nil)
 		}
 
 		err := h.validatePassword(u.Password, u.ConfirmPassword)
@@ -52,7 +52,7 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 			return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
 		}
 
-		err = db.InsertAppUser(&models.AppUser{
+		id, err := db.InsertAppUser(&models.AppUser{
 			UserName: u.UserName,
 			Password: hash,
 			Active:   true,
@@ -61,15 +61,13 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 			return helpers.ErrAppGeneric(fmt.Errorf("error saving user: %v", err))
 		}
 
-		return c.JSON(http.StatusOK, &models.ApiResult{
-			Success: true,
-		})
+		return c.JSON(http.StatusOK, models.NewApiIDResult(id))
 	}
 }
 
-func (h *appUserHandler) UpdateUser(id apiParam) echo.HandlerFunc {
+func (h *appUserHandler) UpdateUser(idParam apiParam) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		i := c.Param(id.String())
+		i := c.Param(idParam.String())
 
 		id, err := bson.ObjectIDFromHex(i)
 		if err != nil {
@@ -92,8 +90,21 @@ func (h *appUserHandler) UpdateUser(id apiParam) echo.HandlerFunc {
 	}
 }
 
-func (h *appUserHandler) DeleteUser() echo.HandlerFunc {
+func (h *appUserHandler) DeleteUser(idParam apiParam) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		i := c.Param(idParam.String())
+
+		id, err := bson.ObjectIDFromHex(i)
+		if err != nil {
+			return helpers.NewAppError(http.StatusBadRequest, "Invalid ID.", err)
+		}
+
+		err = db.DeleteAppUserByID(id)
+
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+
 		return c.NoContent(http.StatusNoContent)
 	}
 }

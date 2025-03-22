@@ -48,23 +48,16 @@ func SessionByID(id string) (s *models.Session, err error) {
 }
 
 func DeleteSessionByID(id string) (err error) {
-	c, err := NewClient()
-	if err != nil {
-		return
-	}
 
 	hex, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
 
-	f := bson.D{{"_id", hex}}
-
-	res, err := c.Database(clientInstance.DbName).
-		Collection(collectionSession).
-		DeleteMany(context.TODO(), f)
-
-	_ = res.DeletedCount
+	err = deleteByID(hex, collectionSession)
+	if err != nil {
+		return
+	}
 
 	return
 }

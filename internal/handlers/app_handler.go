@@ -10,6 +10,7 @@ var GoAppHandler = &app.Handler{
 
 	Styles: []string{"/web/css/bootstrap.min.css", "/web/css/common.css", "/web/font/bootstrap-icons.min.css"},
 	Scripts: []string{"/web/scripts/bootstrap.bundle.min.js",
+		"/web/scripts/popper.min.js",
 		"/web/scripts/cash.min.js",
 		"/web/scripts/common.js",
 	},

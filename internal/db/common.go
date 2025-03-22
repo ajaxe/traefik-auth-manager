@@ -37,3 +37,19 @@ func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
 	return
 }
 
+func deleteByID(id bson.ObjectID, collection string) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"_id", id}}
+
+	res, err := c.Database(clientInstance.DbName).
+		Collection(collection).
+		DeleteMany(context.TODO(), f)
+
+	_ = res.DeletedCount
+
+	return
+}

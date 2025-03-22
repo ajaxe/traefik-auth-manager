@@ -79,11 +79,14 @@ func UpdateUserHostedApps(u *models.AppUser) (err error) {
 	return
 }
 
-func InsertAppUser(u *models.AppUser) (err error) {
+func InsertAppUser(u *models.AppUser) (id bson.ObjectID, err error) {
 	c, err := NewClient()
 	if err != nil {
 		return
 	}
+
+	id = bson.NewObjectID()
+	u.ID = id
 
 	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
 	defer cancel()
@@ -93,4 +96,7 @@ func InsertAppUser(u *models.AppUser) (err error) {
 		InsertOne(ctx, u)
 
 	return
+}
+func DeleteAppUserByID(id bson.ObjectID) error {
+	return deleteByID(id, collectionAppUser)
 }
