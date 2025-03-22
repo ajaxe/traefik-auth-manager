@@ -52,7 +52,7 @@ func UpdatePassword(u *models.AppUser) (err error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
 	defer cancel()
 
-	update := bson.D{{"$set", bson.D{{"Password", u.Password}}}}
+	update := bson.D{{"$set", bson.D{{"password", u.Password}}}}
 
 	_, err = c.Database(clientInstance.DbName).
 		Collection(collectionAppUser).
@@ -70,7 +70,7 @@ func UpdateUserHostedApps(u *models.AppUser) (err error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
 	defer cancel()
 
-	update := bson.D{{"$set", bson.D{{"Applications", u.Applications}}}}
+	update := bson.D{{"$set", bson.D{{"applications", u.Applications}}}}
 
 	_, err = c.Database(clientInstance.DbName).
 		Collection(collectionAppUser).
@@ -99,4 +99,21 @@ func InsertAppUser(u *models.AppUser) (id bson.ObjectID, err error) {
 }
 func DeleteAppUserByID(id bson.ObjectID) error {
 	return deleteByID(id, collectionAppUser)
+}
+func AppUserByUsername(username string) (s *models.AppUser, err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"username", username}}
+	res := c.Database(clientInstance.DbName).
+		Collection(collectionAppUser).
+		FindOne(context.TODO(), f)
+
+	s = &models.AppUser{}
+
+	err = res.Decode(s)
+
+	return
 }

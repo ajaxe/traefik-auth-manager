@@ -3,14 +3,14 @@ package models
 import "go.mongodb.org/mongo-driver/v2/bson"
 
 type ApplicationIdentifier struct {
-	HostAppId bson.ObjectID `json:"hostedAppId"`
+	HostAppId bson.ObjectID `bson:"host_app_id" json:"hostAppId"`
 	Name      string        `json:"name"`
 }
 
 type AppUser struct {
 	ID           bson.ObjectID            `bson:"_id" json:"id"`
-	UserName     string                   `json:"userName"`
-	Password     string                   `json:"-"`
+	UserName     string                   `bson:"username" json:"userName"`
+	Password     string                   `bson:"password" json:"-"`
 	Active       bool                     `json:"active"`
 	Applications []*ApplicationIdentifier `json:"applications"`
 }
