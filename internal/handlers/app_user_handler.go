@@ -76,12 +76,12 @@ func (h *appUserHandler) UpdateUser(idParam apiParam) echo.HandlerFunc {
 
 		id, err := bson.ObjectIDFromHex(i)
 		if err != nil {
-			return helpers.NewAppError(http.StatusBadRequest, "Invalid ID.", err)
+			return helpers.ErrAppBadID(err)
 		}
 
 		var d models.AppUserChange
 		if err := c.Bind(&d); err != nil {
-			return helpers.NewAppError(http.StatusBadRequest, "Invalid data.", err)
+			return helpers.ErrInvalidData(err)
 		}
 		d.ID = id
 

@@ -6,10 +6,15 @@ import (
 	"strings"
 )
 
-var ErrAppBadID = NewAppError(http.StatusBadRequest, "Invalid ID.", nil)
+func ErrAppBadID(err error) *AppError {
+	return NewAppError(http.StatusBadRequest, "Invalid ID.", err)
+}
 
 func ErrAppGeneric(err error) *AppError {
 	return NewAppError(http.StatusInternalServerError, "Something went wrong.", err)
+}
+func ErrInvalidData(err error) *AppError {
+	return NewAppError(http.StatusBadRequest, "Invalid data.", err)
 }
 
 func NewAppError(status int, message string, e error) *AppError {

@@ -20,11 +20,12 @@ func (l *FormLabel) Render() app.UI {
 
 type FormText struct {
 	app.Compo
-	ID        string
-	Value     string
-	ReadOnly  bool
-	BindTo    any
-	InputType string
+	ID          string
+	Value       string
+	ReadOnly    bool
+	BindTo      any
+	InputType   string
+	Placeholder string
 }
 
 func (t *FormText) Render() app.UI {
@@ -40,7 +41,7 @@ func (t *FormText) Render() app.UI {
 	elem := app.Input().
 		Type(it).
 		ReadOnly(t.ReadOnly).
-		Placeholder(t.Value).
+		Placeholder(t.Placeholder).
 		Class(c).
 		ID(t.ID).
 		Value(t.Value)
@@ -55,18 +56,24 @@ func (t *FormText) Render() app.UI {
 type FormControl struct {
 	app.Compo
 	Content func() []app.UI
+	Compact bool
 }
 
 func (f *FormControl) Render() app.UI {
-	return app.Div().Class("form-floating mb-3").Body(f.Content()...)
+	m := "mb-3"
+	if f.Compact {
+		m = ""
+	}
+	return app.Div().Class("form-floating " + m).Body(f.Content()...)
 }
 
 type FormCheckbox struct {
 	app.Compo
-	role   string // empty or "switch"
-	bindTo any
-	value  bool
-	label  string
+	role     string // empty or "switch"
+	BindTo   any
+	Value    bool
+	label    string
+	Disabled bool
 }
 
 func (c *FormCheckbox) Render() app.UI {
@@ -80,12 +87,13 @@ func (c *FormCheckbox) Render() app.UI {
 	input := app.Input().
 		Class("form-check-input").
 		Type("checkbox").
-		Value(c.value).
-		Checked(c.value).
+		Value(c.Value).
+		Checked(c.Value).
+		Disabled(c.Disabled).
 		ID(id)
 
-	if c.bindTo != nil {
-		input.OnChange(c.ValueTo(c.bindTo))
+	if c.BindTo != nil {
+		input.OnChange(c.ValueTo(c.BindTo))
 	}
 
 	return app.Div().Class("form-check "+s).
