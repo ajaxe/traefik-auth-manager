@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/db"
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
@@ -56,8 +57,38 @@ func (h *hostedAppHandler) UpdateHostedApp(p apiParam) echo.HandlerFunc {
 			return helpers.ErrInvalidData(err)
 		}
 		d.ID = id
+
+		if d.ID.IsZero() {
+			return helpers.ErrAppRequired("Host app ID")
+		}
+
+		err = h.validate(d)
+		if err != nil {
+			return err
+		}
+
+		err = db.UpdateHostedApplication(&d)
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+
 		return c.JSON(http.StatusAccepted, &models.ApiResult{
 			Success: true,
 		})
 	}
+}
+func (h *hostedAppHandler) validate(m models.HostedApplication) error {
+	if m.Name == "" {
+		return helpers.ErrAppRequired("Hosted app name")
+	}
+	if m.ServiceToken == "" {
+		return helpers.ErrAppRequired("Hosted app service token")
+	}
+	if m.ServiceURL == "" {
+		return helpers.ErrAppRequired("Hosted app service URL")
+	}
+	if _, err := url.Parse(m.ServiceURL); err != nil {
+		return helpers.NewAppError(http.StatusBadRequest, "Invalid service URL.", err)
+	}
+	return nil
 }

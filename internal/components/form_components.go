@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -70,7 +71,8 @@ func (f *FormControl) Render() app.UI {
 type FormCheckbox struct {
 	app.Compo
 	role     string // empty or "switch"
-	BindTo   any
+	id       string
+	BindTo   *bool
 	Value    bool
 	label    string
 	Disabled bool
@@ -82,25 +84,34 @@ func (c *FormCheckbox) Render() app.UI {
 		s = "form-switch"
 	}
 
-	id := fmt.Sprintf("chk-%v", time.Now().UnixMicro())
+	if c.id == "" {
+		c.id = fmt.Sprintf("chk-%v", time.Now().UnixMicro())
+	}
 
 	input := app.Input().
 		Class("form-check-input").
 		Type("checkbox").
-		Value(c.Value).
 		Checked(c.Value).
 		Disabled(c.Disabled).
-		ID(id)
+		ID(c.id)
 
 	if c.BindTo != nil {
-		input.OnChange(c.ValueTo(c.BindTo))
+		input.OnChange(c.checkTo(c.BindTo))
 	}
 
 	return app.Div().Class("form-check "+s).
 		Body(
 			input,
 			app.Label().Class("form-check-label").
-				For(id).
+				For(c.id).
 				Text(c.label),
 		)
+}
+
+func (c *FormCheckbox) checkTo(v *bool) app.EventHandler {
+	return func(ctx app.Context, e app.Event) {
+		checked := ctx.JSSrc().Get("checked").Bool()
+		v = &checked
+		helpers.AppLogf("ID=%v, is-checked: %v, addr: %v", c.id, *v, v)
+	}
 }

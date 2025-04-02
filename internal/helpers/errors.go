@@ -16,6 +16,9 @@ func ErrAppGeneric(err error) *AppError {
 func ErrInvalidData(err error) *AppError {
 	return NewAppError(http.StatusBadRequest, "Invalid data.", err)
 }
+func ErrAppRequired(m string) *AppError {
+	return NewAppError(http.StatusBadRequest, fmt.Sprintf("%s is required.", m), nil)
+}
 
 func NewAppError(status int, message string, e error) *AppError {
 	return &AppError{

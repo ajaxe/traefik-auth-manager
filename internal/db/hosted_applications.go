@@ -41,3 +41,19 @@ func HostedApplicationByID(id string) (s *models.HostedApplication, err error) {
 
 	return
 }
+func UpdateHostedApplication(h *models.HostedApplication) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"_id", h.ID}}
+	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	defer cancel()
+
+	_, err = c.Database(clientInstance.DbName).
+		Collection(collectionHostedApps).
+		ReplaceOne(ctx, f, h)
+
+	return
+}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -36,7 +35,6 @@ func (u *UserList) OnMount(ctx app.Context) {
 	b := app.Window().URL()
 	b.Path = ""
 	ctx.Handle(actionUserListReload, func(ctx app.Context, a app.Action) {
-		helpers.AppLogf("reloading user list")
 		d, _ := frontend.UserList(b.String())
 		h, _ := frontend.HostedAppList(b.String())
 

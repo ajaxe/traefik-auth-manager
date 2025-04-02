@@ -19,7 +19,15 @@ func (h *HostedAppList) OnNav(ctx app.Context) {
 	h.loadDataInternal(ctx)
 }
 func (h *HostedAppList) OnMount(ctx app.Context) {
-	ctx.Handle(actionHostedAppReload, h.reloadData)
+	ctx.Handle(actionHostedAppReload, func(ctx app.Context, a app.Action) {
+		b := app.Window().URL()
+		b.Path = ""
+		l, _ := frontend.HostedAppList(b.String())
+
+		h.apps = l.Data
+		helpers.AppLogf("reloadData: hosted-app list")
+		ctx.Update()
+	})
 }
 func (h *HostedAppList) Render() app.UI {
 	return app.Div().Body(
@@ -56,19 +64,27 @@ func (h *HostedAppList) itemActions(i *HostedAppListItem) func() []app.UI {
 		return []app.UI{b}
 	}
 }
-func (h *HostedAppList) reloadData(ctx app.Context, a app.Action) {
-	helpers.AppLogf("reloadData: hosted-app list")
-	h.loadDataInternal(ctx)
-}
+
+/*
+	func (h *HostedAppList) reloadData(ctx app.Context, a app.Action) {
+		b := app.Window().URL()
+		b.Path = ""
+		l, _ := frontend.HostedAppList(b.String())
+
+		h.apps = l.Data
+		helpers.AppLogf("reloadData: hosted-app list")
+	}
+*/
 func (h *HostedAppList) loadDataInternal(ctx app.Context) {
 	b := app.Window().URL()
 	b.Path = ""
 	ctx.Async(func() {
 		l, _ := frontend.HostedAppList(b.String())
 
-		ctx.Dispatch(func(c app.Context) {
+		ctx.Dispatch(func(ctx app.Context) {
 			h.apps = l.Data
 			helpers.AppLogf("loadDataInternal: hosted-app list")
+			ctx.Update()
 		})
 	})
 }
@@ -126,7 +142,7 @@ func (h *HostedAppListItem) activeCheckbox() app.UI {
 		Body(
 			&FormCheckbox{
 				label:    "Active",
-				BindTo:   h.happ.Active,
+				BindTo:   &h.happ.Active,
 				Value:    h.happ.Active,
 				role:     "switch",
 				Disabled: h.ReadOnly,
@@ -166,8 +182,6 @@ func (h *HostedAppListItem) handleOnEdit(ctx app.Context, a app.Action) {
 	}
 	o := *h.happ
 	h.originalData = &o
-
-	helpers.AppLogf("Are happ equal orig == copy? = %v", h.happ == h.originalData)
 
 	h.readonlyView(false)
 }
@@ -225,8 +239,8 @@ func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 	u := app.Window().URL()
 	u.Path = ""
 
-	helpers.AppLogf("OnSave: original: %v", h.originalData)
-	helpers.AppLogf("OnSave: current: %v", h.happ)
+	helpers.AppLogf("OnSave: current: %v, active addr: %v", h.happ, &h.happ.Active)
+	
 	r := &models.ApiResult{}
 	err := frontend.PutHostedApp(u.String(), h.originalData.ID.Hex(), h.happ, &r)
 
@@ -234,6 +248,6 @@ func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 		helpers.AppLogf("h-apps onSave error: %v", err)
 		return
 	}
-	h.cancel()
+	h.readonlyView(true)
 	ctx.NewAction(actionHostedAppReload)
 }
