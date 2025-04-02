@@ -69,7 +69,7 @@ func (u *UserAppAssignmentBtn) Render() app.UI {
 	if u.selected {
 		c = "btn-primary"
 	}
-	helpers.AppLogf("rendering: %s:selected=%v", u.ID, u.selected)
+
 	return app.Button().
 		DataSet("app-id", u.ID).
 		DataSet("selected", u.selected).
@@ -81,8 +81,6 @@ func (u *UserAppAssignmentBtn) click(ctx app.Context, e app.Event) {
 	e.PreventDefault()
 	b := app.Window().URL()
 	b.Path = ""
-
-	helpers.AppLogf("btn clicked: id=%v|selected=%v", u.ID, u.selected)
 
 	ctx.Async(func() {
 		var err error
@@ -97,7 +95,6 @@ func (u *UserAppAssignmentBtn) click(ctx app.Context, e app.Event) {
 		}
 		ctx.Dispatch(func(ctx app.Context) {
 			u.selected = !u.selected
-			helpers.AppLogf("btn clicked: after: id=%v|selected=%v", u.ID, u.selected)
 		})
 	})
 

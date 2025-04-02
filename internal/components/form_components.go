@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -112,6 +111,5 @@ func (c *FormCheckbox) toggleCheck(v *bool) app.EventHandler {
 	return func(ctx app.Context, e app.Event) {
 		checked := ctx.JSSrc().Get("checked").Bool()
 		*v = checked
-		helpers.AppLogf("ID=%v, is-checked: %v, addr: %v", c.id, *v, v)
 	}
 }

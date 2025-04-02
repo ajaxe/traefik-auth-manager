@@ -16,9 +16,6 @@ type UserDeleteBtn struct {
 	confirm bool
 }
 
-func (u *UserDeleteBtn) OnMount(ctx app.Context) {
-	helpers.AppLogf("btn id: %s", u.id)
-}
 func (u *UserDeleteBtn) Render() app.UI {
 	u.id = fmt.Sprintf("u-del-btn-%s", u.user.ID.Hex())
 	return app.If(!u.confirm, func() app.UI {

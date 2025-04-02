@@ -2,7 +2,6 @@ package components
 
 import (
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -25,7 +24,6 @@ func (h *HostedAppList) OnMount(ctx app.Context) {
 		l, _ := frontend.HostedAppList(b.String())
 
 		h.apps = l.Data
-		helpers.AppLogf("reloadData: hosted-app list")
 		ctx.Update()
 	})
 }
@@ -57,7 +55,6 @@ func (h *HostedAppList) itemActions(i *HostedAppListItem) func() []app.UI {
 	b := &EditBtn{
 		onClick: func(ctx app.Context, e app.Event) {
 			ctx.NewActionWithValue(actionHostedAppEdit, i.happ.ID.Hex())
-			helpers.AppLogf("name=%s, url=%s", i.happ.Name, i.happ.ServiceURL)
 		},
 	}
 	return func() []app.UI {
@@ -65,16 +62,6 @@ func (h *HostedAppList) itemActions(i *HostedAppListItem) func() []app.UI {
 	}
 }
 
-/*
-	func (h *HostedAppList) reloadData(ctx app.Context, a app.Action) {
-		b := app.Window().URL()
-		b.Path = ""
-		l, _ := frontend.HostedAppList(b.String())
-
-		h.apps = l.Data
-		helpers.AppLogf("reloadData: hosted-app list")
-	}
-*/
 func (h *HostedAppList) loadDataInternal(ctx app.Context) {
 	b := app.Window().URL()
 	b.Path = ""
@@ -83,7 +70,6 @@ func (h *HostedAppList) loadDataInternal(ctx app.Context) {
 
 		ctx.Dispatch(func(ctx app.Context) {
 			h.apps = l.Data
-			helpers.AppLogf("loadDataInternal: hosted-app list")
 			ctx.Update()
 		})
 	})
@@ -103,7 +89,6 @@ func (h *HostedAppListItem) OnMount(ctx app.Context) {
 }
 
 func (h *HostedAppListItem) Render() app.UI {
-	helpers.AppLogf("happ: Name=%s:Compact=%v:ReadOnly=%v", h.happ.Name, h.Compact, h.ReadOnly)
 	return app.Form().Class("row").
 		Body(
 			h.serviceTokenUI(),
@@ -239,13 +224,10 @@ func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 	u := app.Window().URL()
 	u.Path = ""
 
-	helpers.AppLogf("OnSave: current: %v, active addr: %v", h.happ.Active, &h.happ.Active)
-
 	r := &models.ApiResult{}
 	err := frontend.PutHostedApp(u.String(), h.originalData.ID.Hex(), h.happ, &r)
 
 	if err != nil {
-		helpers.AppLogf("h-apps onSave error: %v", err)
 		return
 	}
 	h.readonlyView(true)

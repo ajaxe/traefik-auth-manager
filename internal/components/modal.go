@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -22,7 +21,7 @@ func (m *Modal) Render() app.UI {
 	if m.titleID == "" {
 		m.titleID = fmt.Sprintf("m-title-%v", time.Now().UnixMicro())
 	}
-	helpers.AppLogf("Modal render: show: %v", m.Show)
+
 	return app.If(m.Show, func() app.UI {
 		return app.Div().
 			ID(m.containerID).

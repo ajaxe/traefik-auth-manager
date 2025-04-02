@@ -1,7 +1,6 @@
 package components
 
 import (
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -19,7 +18,6 @@ func (c *CodeUpdate) Render() app.UI {
 	return app.Div().Class("toast-container top-0 start-50 translate-middle-x").
 		Body(
 			app.If(c.updateAvailable, func() app.UI {
-				helpers.AppLogf("codeupdate.render: updateAvailable: %v", c.updateAvailable)
 				return c.updateToast()
 			}),
 		)

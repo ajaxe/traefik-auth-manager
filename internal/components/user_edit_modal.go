@@ -26,7 +26,6 @@ func (u *UserEditModal) OnMount(ctx app.Context) {
 }
 
 func (u *UserEditModal) Render() app.UI {
-	helpers.AppLogf("UserEditModal render: show: %v", u.show)
 	var t string
 	if u.op == "" {
 		u.op = "edit"
@@ -175,7 +174,7 @@ func (u *UserEditModal) formSubmit(ctx app.Context, e app.Event) {
 
 	var r models.ApiResult
 	var err error
-	helpers.AppLogf("u.op: %v", u.op)
+
 	if u.op == "edit" {
 		r, err = u.updateUser(b)
 	} else {
@@ -186,7 +185,6 @@ func (u *UserEditModal) formSubmit(ctx app.Context, e app.Event) {
 	}
 
 	if err != nil {
-		helpers.AppLogf("UserEditModal form submit error: %v", err)
 		r = models.ApiResult{
 			Success:      false,
 			ErrorMessage: err.Error(),
