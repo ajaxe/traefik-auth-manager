@@ -96,7 +96,7 @@ func (c *FormCheckbox) Render() app.UI {
 		ID(c.id)
 
 	if c.BindTo != nil {
-		input.OnChange(c.checkTo(c.BindTo))
+		input.OnChange(c.toggleCheck(c.BindTo))
 	}
 
 	return app.Div().Class("form-check "+s).
@@ -108,10 +108,10 @@ func (c *FormCheckbox) Render() app.UI {
 		)
 }
 
-func (c *FormCheckbox) checkTo(v *bool) app.EventHandler {
+func (c *FormCheckbox) toggleCheck(v *bool) app.EventHandler {
 	return func(ctx app.Context, e app.Event) {
 		checked := ctx.JSSrc().Get("checked").Bool()
-		v = &checked
+		*v = checked
 		helpers.AppLogf("ID=%v, is-checked: %v, addr: %v", c.id, *v, v)
 	}
 }

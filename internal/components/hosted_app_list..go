@@ -239,8 +239,8 @@ func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 	u := app.Window().URL()
 	u.Path = ""
 
-	helpers.AppLogf("OnSave: current: %v, active addr: %v", h.happ, &h.happ.Active)
-	
+	helpers.AppLogf("OnSave: current: %v, active addr: %v", h.happ.Active, &h.happ.Active)
+
 	r := &models.ApiResult{}
 	err := frontend.PutHostedApp(u.String(), h.originalData.ID.Hex(), h.happ, &r)
 
