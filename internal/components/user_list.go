@@ -83,7 +83,7 @@ type UserListItem struct {
 func (ul *UserListItem) Render() app.UI {
 	i := fmt.Sprintf("c%v", time.Now().UnixMilli())
 	return &CardListItem{
-		title: ul.user.UserName,
+		Title: ul.user.UserName,
 		actionItems: func() []app.UI {
 			return []app.UI{
 				&UserListItemEdit{user: ul.user},
