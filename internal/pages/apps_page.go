@@ -14,6 +14,7 @@ func (h *AppsPage) Render() app.UI {
 		Content: []app.UI{
 			app.Div().Class("row justify-content-center").Body(
 				app.Div().Class("col col-md-10 col-lg-8 col-xl-6").Body(
+					components.AppHostedAppAddBtn(),
 					components.AppHostedAppList(),
 				),
 			),

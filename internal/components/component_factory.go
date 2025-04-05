@@ -33,6 +33,9 @@ func AppUserList() *UserList {
 func AppUserEditModal() *UserEditModal {
 	return &UserEditModal{}
 }
-func AppHostedAppList() * HostedAppList {
+func AppHostedAppList() *HostedAppList {
 	return &HostedAppList{}
+}
+func AppHostedAppAddBtn() *HostedAppAddBtn {
+	return &HostedAppAddBtn{}
 }

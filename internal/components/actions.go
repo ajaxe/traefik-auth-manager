@@ -6,5 +6,6 @@ const (
 	actionUserEditClose   = "user-edit-close"
 	actionUserListReload  = "user-list-reload"
 	actionHostedAppEdit   = "hosted-app-edit"
+	actionHostedAppAdd    = "hosted-app-add"
 	actionHostedAppReload = "hosted-app-reload"
 )
