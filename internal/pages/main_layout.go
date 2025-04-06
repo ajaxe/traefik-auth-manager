@@ -23,14 +23,14 @@ func (m *MainLayout) OnNav(ctx app.Context) {
 		sess, err := frontend.CheckAuth(baseURL.String())
 
 		ctx.Dispatch(func(ctx app.Context) {
+			appCtx := frontend.NewAppContext(ctx)
 			if err != nil {
-				frontend.AppContext(ctx).SetIsAuth(false)
+				appCtx.SetIsAuth(false)
 				if app.Window().URL().Path != "/home" {
 					ctx.Navigate("/home")
 				}
 			} else {
-				frontend.AppContext(ctx).
-					SetSession(sess).
+				appCtx.SetSession(sess).
 					SetIsAuth(true)
 			}
 		})

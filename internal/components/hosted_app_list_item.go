@@ -6,12 +6,15 @@ import (
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
+type HostedAppCardOptions struct {
+	ReadOnly bool
+	Compact  bool
+}
 type HostedAppListItem struct {
 	app.Compo
-	happ         *models.HostedApplication
-	originalData *models.HostedApplication
-	ReadOnly     bool
-	Compact      bool
+	HostedAppCardOptions
+	Happ         *models.HostedApplication
+	OriginalData *models.HostedApplication
 	formResult   *models.ApiResult
 }
 
@@ -46,8 +49,8 @@ func (h *HostedAppListItem) serviceNameUI() app.UI {
 					return []app.UI{
 						&FormText{
 							ID:          id,
-							Value:       h.happ.Name,
-							BindTo:      &h.happ.Name,
+							Value:       h.Happ.Name,
+							BindTo:      &h.Happ.Name,
 							InputType:   "text",
 							ReadOnly:    h.ReadOnly,
 							Placeholder: "Not set",
@@ -72,8 +75,8 @@ func (h *HostedAppListItem) serviceTokenUI() app.UI {
 					return []app.UI{
 						&FormText{
 							ID:          id,
-							Value:       h.happ.ServiceToken,
-							BindTo:      &h.happ.ServiceToken,
+							Value:       h.Happ.ServiceToken,
+							BindTo:      &h.Happ.ServiceToken,
 							InputType:   "text",
 							ReadOnly:    h.ReadOnly,
 							Placeholder: "Not set",
@@ -92,8 +95,8 @@ func (h *HostedAppListItem) activeCheckbox() app.UI {
 		Body(
 			&FormCheckbox{
 				label:    "Active",
-				BindTo:   &h.happ.Active,
-				Value:    h.happ.Active,
+				BindTo:   &h.Happ.Active,
+				Value:    h.Happ.Active,
 				role:     "switch",
 				Disabled: h.ReadOnly,
 			},
@@ -110,8 +113,8 @@ func (h *HostedAppListItem) serviceURLUI() app.UI {
 					return []app.UI{
 						&FormText{
 							ID:        id,
-							Value:     h.happ.ServiceURL,
-							BindTo:    &h.happ.ServiceURL,
+							Value:     h.Happ.ServiceURL,
+							BindTo:    &h.Happ.ServiceURL,
 							InputType: "text",
 							ReadOnly:  h.ReadOnly,
 						},
@@ -126,12 +129,12 @@ func (h *HostedAppListItem) serviceURLUI() app.UI {
 }
 func (h *HostedAppListItem) handleOnEdit(ctx app.Context, a app.Action) {
 	id, ok := a.Value.(string)
-	if !ok || id != h.happ.ID.Hex() {
+	if !ok || id != h.Happ.ID.Hex() {
 		h.cancel()
 		return
 	}
-	o := *h.happ
-	h.originalData = &o
+	o := *h.Happ
+	h.OriginalData = &o
 
 	h.readonlyView(false)
 }
@@ -173,9 +176,9 @@ func (h *HostedAppListItem) readonlyView(v bool) {
 	h.Compact = v
 }
 func (h *HostedAppListItem) cancel() {
-	if h.originalData != nil {
-		h.happ = h.originalData
-		h.originalData = nil
+	if h.OriginalData != nil {
+		h.Happ = h.OriginalData
+		h.OriginalData = nil
 	}
 	h.readonlyView(true)
 }
@@ -186,15 +189,12 @@ func (h *HostedAppListItem) onCancel(ctx app.Context, e app.Event) {
 }
 func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 	e.PreventDefault()
-	u := app.Window().URL()
-	u.Path = ""
 
-	r := &models.ApiResult{}
-	err := frontend.PutHostedApp(u.String(), h.originalData.ID.Hex(), h.happ, &r)
+	err := frontend.NewAppContext(ctx).UpdateHostedApp(h.OriginalData.ID.Hex(), *h.Happ)
 
 	if err != nil {
 		return
 	}
 	h.readonlyView(true)
-	ctx.NewAction(actionHostedAppReload)
+	frontend.NewAppContext(ctx).LoadHostedAppList()
 }

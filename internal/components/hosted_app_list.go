@@ -11,21 +11,9 @@ type HostedAppList struct {
 	apps []*models.HostedApplication
 }
 
-func (h *HostedAppList) OnNav(ctx app.Context) {
-	b := app.Window().URL()
-	b.Path = ""
-
-	h.loadDataInternal(ctx)
-}
 func (h *HostedAppList) OnMount(ctx app.Context) {
-	ctx.Handle(actionHostedAppReload, func(ctx app.Context, a app.Action) {
-		b := app.Window().URL()
-		b.Path = ""
-		l, _ := frontend.HostedAppList(b.String())
-
-		h.apps = l.Data
-		ctx.Update()
-	})
+	ctx.ObserveState(frontend.StateKeyUserList, &h.apps)
+	ctx.Handle(actionHostedAppAdd, h.handleOnAdd)
 }
 func (h *HostedAppList) Render() app.UI {
 	return app.Div().Body(
@@ -36,41 +24,46 @@ func (h *HostedAppList) listItems() []app.UI {
 	items := []app.UI{}
 
 	for _, i := range h.apps {
-		itm := &HostedAppListItem{
-			happ:     i,
-			ReadOnly: true,
-			Compact:  true,
-		}
-		items = append(items, &CardListItem{
-			Title:       i.Name,
-			actionItems: h.itemActions(itm),
-			content: func() []app.UI {
-				return []app.UI{itm}
-			},
-		})
+		items = append(items, newHostedAppCardItem(*i))
 	}
 	return items
 }
-func (h *HostedAppList) itemActions(i *HostedAppListItem) func() []app.UI {
-	b := &EditBtn{
-		onClick: func(ctx app.Context, e app.Event) {
-			ctx.NewActionWithValue(actionHostedAppEdit, i.happ.ID.Hex())
-		},
+
+func newHostedAppCardItem(h models.HostedApplication, o ...HostedAppCardOptions) *CardListItem {
+	if len(o) == 0 {
+		o = append(o, HostedAppCardOptions{
+			ReadOnly: true,
+			Compact:  true,
+		})
 	}
-	return func() []app.UI {
-		return []app.UI{b}
+	itm := &HostedAppListItem{
+		Happ:                 &h,
+		HostedAppCardOptions: o[0],
+	}
+	var a []app.UI
+	if h.Name != "" {
+		a = itemActions(itm)
+	}
+	title := h.Name
+	if title == "" {
+		title = "New Application"
+	}
+	return &CardListItem{
+		Title:       h.Name,
+		actionItems: a,
+		content:     []app.UI{itm},
 	}
 }
+func itemActions(i *HostedAppListItem) []app.UI {
+	b := &EditBtn{
+		onClick: func(ctx app.Context, e app.Event) {
+			ctx.NewActionWithValue(actionHostedAppEdit, i.Happ.ID.Hex())
+		},
+	}
+	return []app.UI{b}
+}
 
-func (h *HostedAppList) loadDataInternal(ctx app.Context) {
-	b := app.Window().URL()
-	b.Path = ""
-	ctx.Async(func() {
-		l, _ := frontend.HostedAppList(b.String())
-
-		ctx.Dispatch(func(ctx app.Context) {
-			h.apps = l.Data
-			ctx.Update()
-		})
-	})
+func (h *HostedAppList) handleOnAdd(ctx app.Context, a app.Action) {
+	e := &models.HostedApplication{}
+	h.apps = append([]*models.HostedApplication{e}, h.apps...)
 }

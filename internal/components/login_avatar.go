@@ -13,14 +13,14 @@ type LoginAvatar struct {
 }
 
 func (a *LoginAvatar) OnMount(ctx app.Context) {
-	ctx.ObserveState(frontend.StatKeyUserSession, &a.s)
+	ctx.ObserveState(frontend.StateKeyUserSession, &a.s)
 }
 func (a *LoginAvatar) Render() app.UI {
 	return app.Div().Class("align-self-center " + a.displayCss).
 		Body(
 			app.Div().Class("d-inline-block shadow-lg dropdown rounded-pill").
 				Body(
-					app.Img().Width(64).Class("img-thumbnail rounded-pill").
+					app.Img().Width(48).Class("img-thumbnail rounded-pill").
 						Title(a.s.User.Name).
 						Src(a.s.User.Picture),
 				),

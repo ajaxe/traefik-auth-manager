@@ -31,6 +31,7 @@ const (
 	sessionToken   = "session-token"
 	keyUserSession = "user-session"
 	keyIDToken     = "idtoken"
+	keyIsAuth      = "isauth"
 )
 
 func InitAuthConfig(appConfig helpers.AppConfig) appOAuthConfig {

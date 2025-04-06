@@ -9,30 +9,56 @@ import (
 )
 
 const (
-	StateKeyIsAuth     = "isAuth"
-	StatKeyUserSession = "user-session"
+	StateKeyIsAuth      = "isAuth"
+	StateKeyUserSession = "user-session"
+	StateKeyUserList    = "user-list"
 )
 
-type AppContext app.Context
+func NewAppContext(ctx app.Context) AppContext {
+	return AppContext{
+		Context: ctx,
+	}
+}
+
+type AppContext struct {
+	app.Context
+}
 
 func (c AppContext) Session() models.Session {
 	var s models.Session
-	app.Context(c).GetState(StatKeyUserSession, &s)
+	c.GetState(StateKeyUserSession, &s)
 	return s
 }
 func (c AppContext) SetSession(s models.Session) AppContext {
-	app.Context(c).SetState(StatKeyUserSession, s)
+	c.SetState(StateKeyUserSession, s)
 	return c
 }
 func (c AppContext) SetIsAuth(a bool) AppContext {
-	app.Context(c).SetState(StateKeyIsAuth, a)
+	c.SetState(StateKeyIsAuth, a)
 	return c
 }
 func (c AppContext) IsAuth() bool {
 	var a bool
-	app.Context(c).GetState(StateKeyIsAuth, &a)
+	c.GetState(StateKeyIsAuth, &a)
 	return a
 }
 func buildApiURL(b, p string) string {
 	return fmt.Sprintf("%s/api/%s", strings.TrimSuffix(b, "/"), strings.TrimPrefix(p, "/"))
+}
+
+func (c AppContext) LoadHostedAppList() {
+	c.Async(func() {
+		b := app.Window().URL()
+		b.Path = ""
+		l, _ := HostedAppList(b.String())
+		c.SetState(StateKeyUserList, l.Data)
+	})
+}
+func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (err error) {
+	u := app.Window().URL()
+	u.Path = ""
+
+	r := &models.ApiResult{}
+	err = PutHostedApp(u.String(), id, payload, &r)
+	return
 }

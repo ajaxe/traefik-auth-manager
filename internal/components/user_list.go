@@ -84,21 +84,17 @@ func (ul *UserListItem) Render() app.UI {
 	i := fmt.Sprintf("c%v", time.Now().UnixMilli())
 	return &CardListItem{
 		Title: ul.user.UserName,
-		actionItems: func() []app.UI {
-			return []app.UI{
-				&UserListItemEdit{user: ul.user},
-				&UserDeleteBtn{user: ul.user},
-			}
+		actionItems: []app.UI{
+			&UserListItemEdit{user: ul.user},
+			&UserDeleteBtn{user: ul.user},
 		},
-		content: func() []app.UI {
-			return []app.UI{
-				&UserAppAssignment{
-					userApps: ul.user.Applications,
-					ID:       i,
-					allApps:  ul.allApps,
-					userId:   ul.user.ID.Hex(),
-				},
-			}
+		content: []app.UI{
+			&UserAppAssignment{
+				userApps: ul.user.Applications,
+				ID:       i,
+				allApps:  ul.allApps,
+				userId:   ul.user.ID.Hex(),
+			},
 		},
 	}
 }

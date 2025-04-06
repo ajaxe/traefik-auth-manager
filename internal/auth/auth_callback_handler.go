@@ -93,7 +93,7 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 
-		tokenSess.Values["isauth"] = true
+		tokenSess.Values[keyIsAuth] = true
 		tokenSess.Values[keyUserSession] = id
 		tokenSess.Values[keyIDToken] = idtoken
 
