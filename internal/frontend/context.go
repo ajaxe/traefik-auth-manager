@@ -84,6 +84,14 @@ func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication)
 	err = PutHostedApp(u, id, payload, &r)
 	return
 }
+
+func (c AppContext) AddHostedApp(payload models.HostedApplication) (err error) {
+	u := appBaseURL()
+
+	r := &models.ApiResult{}
+	err = PostHostedApp(u, payload, &r)
+	return
+}
 func (c AppContext) ToggleUserApp(userId, appID string, selected bool, cb func()) {
 	b := appBaseURL()
 	c.Async(func() {

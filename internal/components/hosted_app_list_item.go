@@ -2,6 +2,7 @@ package components
 
 import (
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
+	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -14,8 +15,10 @@ type HostedAppListItem struct {
 	app.Compo
 	HostedAppCardOptions
 	Happ         *models.HostedApplication
-	OriginalData *models.HostedApplication
+	originalData *models.HostedApplication
 	formResult   *models.ApiResult
+	onCancel     func(app.Context)
+	onSave       func(app.Context)
 }
 
 func (h *HostedAppListItem) OnMount(ctx app.Context) {
@@ -34,7 +37,7 @@ func (h *HostedAppListItem) Render() app.UI {
 	if h.ReadOnly {
 		f = f[1:]
 	}
-
+	helpers.AppLogf("Render instance[%p]: %v", h.Happ, h.Happ)
 	return app.Form().Class("row").
 		Body(f...)
 }
@@ -45,21 +48,19 @@ func (h *HostedAppListItem) serviceNameUI() app.UI {
 		Body(
 			&FormControl{
 				Compact: h.Compact,
-				Content: func() []app.UI {
-					return []app.UI{
-						&FormText{
-							ID:          id,
-							Value:       h.Happ.Name,
-							BindTo:      &h.Happ.Name,
-							InputType:   "text",
-							ReadOnly:    h.ReadOnly,
-							Placeholder: "Not set",
-						},
-						&FormLabel{
-							For:   id,
-							Label: "Service Name",
-						},
-					}
+				Content: []app.UI{
+					&FormText{
+						ID:          id,
+						Value:       h.Happ.Name,
+						BindTo:      &h.Happ.Name,
+						InputType:   "text",
+						ReadOnly:    h.ReadOnly,
+						Placeholder: "Not set",
+					},
+					&FormLabel{
+						For:   id,
+						Label: "Service Name",
+					},
 				},
 			},
 		)
@@ -71,21 +72,19 @@ func (h *HostedAppListItem) serviceTokenUI() app.UI {
 		Body(
 			&FormControl{
 				Compact: h.Compact,
-				Content: func() []app.UI {
-					return []app.UI{
-						&FormText{
-							ID:          id,
-							Value:       h.Happ.ServiceToken,
-							BindTo:      &h.Happ.ServiceToken,
-							InputType:   "text",
-							ReadOnly:    h.ReadOnly,
-							Placeholder: "Not set",
-						},
-						&FormLabel{
-							For:   id,
-							Label: "Service Token",
-						},
-					}
+				Content: []app.UI{
+					&FormText{
+						ID:          id,
+						Value:       h.Happ.ServiceToken,
+						BindTo:      &h.Happ.ServiceToken,
+						InputType:   "text",
+						ReadOnly:    h.ReadOnly,
+						Placeholder: "Not set",
+					},
+					&FormLabel{
+						For:   id,
+						Label: "Service Token",
+					},
 				},
 			},
 		)
@@ -109,20 +108,18 @@ func (h *HostedAppListItem) serviceURLUI() app.UI {
 		Body(
 			&FormControl{
 				Compact: h.Compact,
-				Content: func() []app.UI {
-					return []app.UI{
-						&FormText{
-							ID:        id,
-							Value:     h.Happ.ServiceURL,
-							BindTo:    &h.Happ.ServiceURL,
-							InputType: "text",
-							ReadOnly:  h.ReadOnly,
-						},
-						&FormLabel{
-							For:   id,
-							Label: "Service URL",
-						},
-					}
+				Content: []app.UI{
+					&FormText{
+						ID:        id,
+						Value:     h.Happ.ServiceURL,
+						BindTo:    &h.Happ.ServiceURL,
+						InputType: "text",
+						ReadOnly:  h.ReadOnly,
+					},
+					&FormLabel{
+						For:   id,
+						Label: "Service URL",
+					},
 				},
 			},
 		)
@@ -130,11 +127,11 @@ func (h *HostedAppListItem) serviceURLUI() app.UI {
 func (h *HostedAppListItem) handleOnEdit(ctx app.Context, a app.Action) {
 	id, ok := a.Value.(string)
 	if !ok || id != h.Happ.ID.Hex() {
-		h.cancel()
+		h.cancel(ctx)
 		return
 	}
 	o := *h.Happ
-	h.OriginalData = &o
+	h.originalData = &o
 
 	h.readonlyView(false)
 }
@@ -144,9 +141,9 @@ func (h *HostedAppListItem) editActions() app.UI {
 			return app.Div().Class("col-md-12").
 				Body(
 					app.Button().Class("btn btn-primary").Text("Save").
-						OnClick(h.onSave),
+						OnClick(h.handleSave),
 					app.Button().Class("btn btn-link ms-1").Text("Cancel").
-						OnClick(h.onCancel),
+						OnClick(h.handleCancel),
 					h.formResultMessage(),
 				)
 		})
@@ -175,26 +172,37 @@ func (h *HostedAppListItem) readonlyView(v bool) {
 	h.ReadOnly = v
 	h.Compact = v
 }
-func (h *HostedAppListItem) cancel() {
-	if h.OriginalData != nil {
-		h.Happ = h.OriginalData
-		h.OriginalData = nil
+func (h *HostedAppListItem) cancel(ctx app.Context) {
+	if h.originalData != nil {
+		h.Happ = h.originalData
+		h.originalData = nil
 	}
 	h.readonlyView(true)
+	if h.onCancel != nil {
+		ctx.Dispatch(h.onCancel)
+	}
 }
-func (h *HostedAppListItem) onCancel(ctx app.Context, e app.Event) {
-	h.cancel()
+func (h *HostedAppListItem) handleCancel(ctx app.Context, e app.Event) {
+	h.cancel(ctx)
 	e.PreventDefault()
 	ctx.Update()
 }
-func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
+func (h *HostedAppListItem) handleSave(ctx app.Context, e app.Event) {
 	e.PreventDefault()
 
-	err := frontend.NewAppContext(ctx).UpdateHostedApp(h.OriginalData.ID.Hex(), *h.Happ)
+	op := h.onSave
+	if op == nil {
+		op = h.defaultOnSave
+	}
+	helpers.AppLogf("instance [%p]: %v", h.Happ, h.Happ)
+	op(ctx)
+}
+func (h *HostedAppListItem) defaultOnSave(ctx app.Context) {
+	err := frontend.NewAppContext(ctx).UpdateHostedApp(h.originalData.ID.Hex(), *h.Happ)
 
 	if err != nil {
 		return
 	}
-	h.readonlyView(true)
+
 	frontend.NewAppContext(ctx).LoadData(frontend.StateKeyHostedAppList)
 }

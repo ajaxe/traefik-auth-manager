@@ -13,7 +13,6 @@ type AppsPage struct {
 func (h *AppsPage) OnNav(ctx app.Context) {
 	frontend.NewAppContext(ctx).
 		LoadData(frontend.StateKeyHostedAppList)
-
 }
 func (h *AppsPage) Render() app.UI {
 	return &MainLayout{

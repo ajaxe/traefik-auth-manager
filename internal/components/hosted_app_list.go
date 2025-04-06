@@ -27,30 +27,29 @@ func (h *HostedAppList) listItems() []app.UI {
 	}
 	return items
 }
-
-func newHostedAppCardItem(h models.HostedApplication, o ...HostedAppCardOptions) *CardListItem {
-	if len(o) == 0 {
-		o = append(o, HostedAppCardOptions{
+func newHostedAppCardItem(h models.HostedApplication) *CardListItem {
+	nested := &HostedAppListItem{
+		Happ: &h,
+		HostedAppCardOptions: HostedAppCardOptions{
 			ReadOnly: true,
 			Compact:  true,
-		})
+		},
 	}
-	itm := &HostedAppListItem{
-		Happ:                 &h,
-		HostedAppCardOptions: o[0],
-	}
+	return newHostedAppCardItemWithItem(nested)
+}
+func newHostedAppCardItemWithItem(nested *HostedAppListItem) *CardListItem {
 	var a []app.UI
-	if h.Name != "" {
-		a = itemActions(itm)
+	if nested.Happ.Name != "" {
+		a = itemActions(nested)
 	}
-	title := h.Name
+	title := nested.Happ.Name
 	if title == "" {
 		title = "New Application"
 	}
 	return &CardListItem{
-		Title:       h.Name,
+		Title:       nested.Happ.Name,
 		actionItems: a,
-		content:     []app.UI{itm},
+		content:     []app.UI{nested},
 	}
 }
 func itemActions(i *HostedAppListItem) []app.UI {

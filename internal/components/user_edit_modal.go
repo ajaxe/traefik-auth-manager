@@ -86,38 +86,34 @@ func (u *UserEditModal) username() app.UI {
 	ro := u.op == "edit"
 
 	return &FormControl{
-		Content: func() []app.UI {
-			return []app.UI{
-				&FormText{
-					ID:       id,
-					Value:    u.user.UserName,
-					BindTo:   &u.user.UserName,
-					ReadOnly: ro,
-				},
-				&FormLabel{
-					For:   id,
-					Label: "Username",
-				},
-			}
+		Content: []app.UI{
+			&FormText{
+				ID:       id,
+				Value:    u.user.UserName,
+				BindTo:   &u.user.UserName,
+				ReadOnly: ro,
+			},
+			&FormLabel{
+				For:   id,
+				Label: "Username",
+			},
 		},
 	}
 }
 func (u *UserEditModal) passwordControl() app.UI {
 	id := "user-pwd"
 	return &FormControl{
-		Content: func() []app.UI {
-			return []app.UI{
-				&FormText{
-					ID:        id,
-					Value:     u.password,
-					BindTo:    &u.password,
-					InputType: "password",
-				},
-				&FormLabel{
-					For:   id,
-					Label: "Password",
-				},
-			}
+		Content: []app.UI{
+			&FormText{
+				ID:        id,
+				Value:     u.password,
+				BindTo:    &u.password,
+				InputType: "password",
+			},
+			&FormLabel{
+				For:   id,
+				Label: "Password",
+			},
 		},
 	}
 }
@@ -125,19 +121,17 @@ func (u *UserEditModal) passwordControl() app.UI {
 func (u *UserEditModal) confirmPasswordControl() app.UI {
 	id := "user-cnf-pwd"
 	return &FormControl{
-		Content: func() []app.UI {
-			return []app.UI{
-				&FormText{
-					ID:        id,
-					Value:     u.confirmPassword,
-					BindTo:    &u.confirmPassword,
-					InputType: "password",
-				},
-				&FormLabel{
-					For:   id,
-					Label: "Confirm Password",
-				},
-			}
+		Content: []app.UI{
+			&FormText{
+				ID:        id,
+				Value:     u.confirmPassword,
+				BindTo:    &u.confirmPassword,
+				InputType: "password",
+			},
+			&FormLabel{
+				For:   id,
+				Label: "Confirm Password",
+			},
 		},
 	}
 }

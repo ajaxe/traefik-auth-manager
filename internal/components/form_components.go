@@ -55,7 +55,7 @@ func (t *FormText) Render() app.UI {
 
 type FormControl struct {
 	app.Compo
-	Content func() []app.UI
+	Content []app.UI
 	Compact bool
 }
 
@@ -64,7 +64,7 @@ func (f *FormControl) Render() app.UI {
 	if f.Compact {
 		m = ""
 	}
-	return app.Div().Class("form-floating " + m).Body(f.Content()...)
+	return app.Div().Class("form-floating " + m).Body(f.Content...)
 }
 
 type FormCheckbox struct {
