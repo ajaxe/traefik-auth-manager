@@ -13,7 +13,6 @@ type HostedAppList struct {
 
 func (h *HostedAppList) OnMount(ctx app.Context) {
 	ctx.ObserveState(frontend.StateKeyHostedAppList, &h.apps)
-	ctx.Handle(actionHostedAppAdd, h.handleOnAdd)
 }
 func (h *HostedAppList) Render() app.UI {
 	return app.Div().Body(
@@ -61,9 +60,4 @@ func itemActions(i *HostedAppListItem) []app.UI {
 		},
 	}
 	return []app.UI{b}
-}
-
-func (h *HostedAppList) handleOnAdd(ctx app.Context, a app.Action) {
-	e := &models.HostedApplication{}
-	h.apps = append([]*models.HostedApplication{e}, h.apps...)
 }
