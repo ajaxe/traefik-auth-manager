@@ -2,7 +2,6 @@ package components
 
 import (
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -37,7 +36,6 @@ func (h *HostedAppListItem) Render() app.UI {
 	if h.ReadOnly {
 		f = f[1:]
 	}
-	helpers.AppLogf("Render instance[%p]: %v", h.Happ, h.Happ)
 	return app.Form().Class("row").
 		Body(f...)
 }
@@ -194,7 +192,6 @@ func (h *HostedAppListItem) handleSave(ctx app.Context, e app.Event) {
 	if op == nil {
 		op = h.defaultOnSave
 	}
-	helpers.AppLogf("instance [%p]: %v", h.Happ, h.Happ)
 	op(ctx)
 }
 func (h *HostedAppListItem) defaultOnSave(ctx app.Context) {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -30,7 +29,6 @@ func (u *UserDeleteBtn) deleteBtn() app.UI {
 		ID(u.id).
 		Class("btn btn-light").
 		OnClick(func(ctx app.Context, e app.Event) {
-			helpers.AppLog("clicked delete")
 			u.confirm = true
 		}).
 		Body(
