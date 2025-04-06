@@ -11,8 +11,9 @@ type AppsPage struct {
 }
 
 func (h *AppsPage) OnNav(ctx app.Context) {
-	appCtx := frontend.NewAppContext(ctx)
-	appCtx.LoadHostedAppList()
+	frontend.NewAppContext(ctx).
+		LoadData(frontend.StateKeyHostedAppList)
+
 }
 func (h *AppsPage) Render() app.UI {
 	return &MainLayout{

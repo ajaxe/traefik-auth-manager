@@ -11,7 +11,7 @@ import (
 
 type UserDeleteBtn struct {
 	app.Compo
-	user    *models.AppUser
+	user    *frontend.AppUserView
 	id      string
 	confirm bool
 }
@@ -55,7 +55,7 @@ func (u *UserDeleteBtn) deleteConfirmation() app.UI {
 						OnClick(func(ctx app.Context, e app.Event) {
 							r := models.ApiResult{}
 							_ = frontend.RemoveUser(u.user.ID.Hex(), b.String(), &r)
-							ctx.NewAction(actionUserListReload)
+							frontend.NewAppContext(ctx).LoadData(frontend.StateKeyUserList)
 						}),
 					app.Button().
 						Class("btn btn-sm btn-danger").

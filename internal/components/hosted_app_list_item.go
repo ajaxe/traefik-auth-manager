@@ -196,5 +196,5 @@ func (h *HostedAppListItem) onSave(ctx app.Context, e app.Event) {
 		return
 	}
 	h.readonlyView(true)
-	frontend.NewAppContext(ctx).LoadHostedAppList()
+	frontend.NewAppContext(ctx).LoadData(frontend.StateKeyHostedAppList)
 }

@@ -2,6 +2,7 @@ package pages
 
 import (
 	"github.com/ajaxe/traefik-auth-manager/internal/components"
+	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
@@ -9,6 +10,10 @@ type UsersPage struct {
 	app.Compo
 }
 
+func (h *UsersPage) OnNav(ctx app.Context) {
+	frontend.NewAppContext(ctx).
+		LoadData(frontend.StateKeyUserList)
+}
 func (h *UsersPage) Render() app.UI {
 	return &MainLayout{
 		Content: []app.UI{

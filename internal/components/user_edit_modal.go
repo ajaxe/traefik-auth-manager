@@ -180,7 +180,7 @@ func (u *UserEditModal) formSubmit(ctx app.Context, e app.Event) {
 	} else {
 		r, err = u.addUser(b)
 		if err == nil {
-			ctx.NewAction(actionUserListReload)
+			frontend.NewAppContext(ctx).LoadData(frontend.StateKeyUserList)
 		}
 	}
 

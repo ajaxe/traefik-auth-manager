@@ -1,13 +1,13 @@
 package components
 
 import (
-	"github.com/ajaxe/traefik-auth-manager/internal/models"
+	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
 type UserEditBtn struct {
 	app.Compo
-	user *models.AppUser
+	user *frontend.AppUserView
 }
 
 func (u *UserEditBtn) Render() app.UI {

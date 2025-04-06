@@ -15,6 +15,7 @@ type UserAppAssignment struct {
 	userApps []*models.ApplicationIdentifier
 	allApps  map[string]*models.HostedApplication
 	userId   string
+	user     *frontend.AppUserView
 }
 
 func (u *UserAppAssignment) Render() app.UI {

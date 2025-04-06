@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	StateKeyIsAuth      = "isAuth"
-	StateKeyUserSession = "user-session"
-	StateKeyUserList    = "user-list"
+	StateKeyIsAuth        = "isAuth"
+	StateKeyUserSession   = "user-session"
+	StateKeyUserList      = "user-list"
+	StateKeyHostedAppList = "hosted-app-list"
 )
 
 func NewAppContext(ctx app.Context) AppContext {
@@ -51,12 +52,32 @@ func appBaseURL() string {
 func buildApiURL(b, p string) string {
 	return fmt.Sprintf("%s/api/%s", strings.TrimSuffix(b, "/"), strings.TrimPrefix(p, "/"))
 }
-
-func (c AppContext) LoadHostedAppList() {
+func (c AppContext) LoadData(key string) {
+	switch key {
+	case StateKeyUserList:
+		c.loadUserList()
+	case StateKeyHostedAppList:
+		c.loadHostedAppList()
+	default: // do nothing
+	}
+}
+func (c AppContext) loadHostedAppList() {
 	b := appBaseURL()
 	c.Async(func() {
 		l, _ := HostedAppList(b)
-		c.SetState(StateKeyUserList, l.Data)
+		c.SetState(StateKeyHostedAppList, l.Data)
+	})
+}
+func (c AppContext) loadUserList() {
+	b := appBaseURL()
+
+	c.Async(func() {
+		d, _ := UserList(b)
+		h, _ := HostedAppList(b)
+		c.SetState(StateKeyUserList, UserListViewData{
+			Users: d.Data,
+			Apps:  h.Data,
+		})
 	})
 }
 func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (err error) {
@@ -65,9 +86,6 @@ func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication)
 	r := &models.ApiResult{}
 	err = PutHostedApp(u, id, payload, &r)
 	return
-}
-func (c AppContext) LoadUserList() {
-
 }
 func (c AppContext) ToggleUserApp(userId, appID string, selected bool, cb func()) {
 	b := appBaseURL()

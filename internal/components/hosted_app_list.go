@@ -12,7 +12,7 @@ type HostedAppList struct {
 }
 
 func (h *HostedAppList) OnMount(ctx app.Context) {
-	ctx.ObserveState(frontend.StateKeyUserList, &h.apps)
+	ctx.ObserveState(frontend.StateKeyHostedAppList, &h.apps)
 	ctx.Handle(actionHostedAppAdd, h.handleOnAdd)
 }
 func (h *HostedAppList) Render() app.UI {

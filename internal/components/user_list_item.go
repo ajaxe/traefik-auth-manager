@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
 type UserListItem struct {
 	app.Compo
-	user    *models.AppUser
+	user    *frontend.AppUserView
 	allApps map[string]*models.HostedApplication
 }
 

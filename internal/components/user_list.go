@@ -10,35 +10,12 @@ import (
 
 type UserList struct {
 	app.Compo
-	users          []*models.AppUser
-	allApps        []*models.HostedApplication
+	data           frontend.UserListViewData
 	appMapInternal map[string]*models.HostedApplication
 }
 
-func (u *UserList) OnNav(ctx app.Context) {
-	b := app.Window().URL()
-	b.Path = ""
-
-	ctx.Async(func() {
-		d, _ := frontend.UserList(b.String())
-		h, _ := frontend.HostedAppList(b.String())
-
-		ctx.Dispatch(func(c app.Context) {
-			u.users = d.Data
-			u.allApps = h.Data
-		})
-	})
-}
 func (u *UserList) OnMount(ctx app.Context) {
-	b := app.Window().URL()
-	b.Path = ""
-	ctx.Handle(actionUserListReload, func(ctx app.Context, a app.Action) {
-		d, _ := frontend.UserList(b.String())
-		h, _ := frontend.HostedAppList(b.String())
-
-		u.users = d.Data
-		u.allApps = h.Data
-	})
+	ctx.ObserveState(frontend.StateKeyUserList, &u.data)
 }
 
 func (u *UserList) Render() app.UI {
@@ -49,9 +26,9 @@ func (u *UserList) Render() app.UI {
 
 func (u *UserList) userListItems() []app.UI {
 	l := []app.UI{}
-	for _, r := range u.users {
+	for _, r := range u.data.Users {
 		l = append(l, &UserListItem{
-			user:    r,
+			user:    &frontend.AppUserView{AppUser: *r},
 			allApps: u.appMap(),
 		})
 	}
@@ -63,7 +40,7 @@ func (u *UserList) appMap() map[string]*models.HostedApplication {
 	}
 	m := make(map[string]*models.HostedApplication)
 
-	for _, k := range u.allApps {
+	for _, k := range u.data.Apps {
 		m[strings.ToLower(k.Name)] = k
 	}
 
