@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -79,23 +78,12 @@ func (u *UserAppAssignmentBtn) Render() app.UI {
 }
 func (u *UserAppAssignmentBtn) click(ctx app.Context, e app.Event) {
 	e.PreventDefault()
-	b := app.Window().URL()
-	b.Path = ""
 
-	ctx.Async(func() {
-		var err error
-		r := models.ApiResult{}
-		if u.selected {
-			err = frontend.RemoveUserApp(u.userId, u.ID, b.String(), r)
-		} else {
-			err = frontend.AssignUserApp(u.userId, u.ID, b.String(), r)
-		}
-		if err != nil {
-			helpers.AppLogf("%v", err)
-		}
-		ctx.Dispatch(func(ctx app.Context) {
-			u.selected = !u.selected
-		})
-	})
-
+	frontend.NewAppContext(ctx).
+		ToggleUserApp(u.userId, u.ID, u.selected,
+			func() {
+				ctx.Dispatch(func(ctx app.Context) {
+					u.selected = !u.selected
+				})
+			})
 }

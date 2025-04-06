@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
@@ -42,23 +43,46 @@ func (c AppContext) IsAuth() bool {
 	c.GetState(StateKeyIsAuth, &a)
 	return a
 }
+func appBaseURL() string {
+	b := app.Window().URL()
+	b.Path = ""
+	return b.String()
+}
 func buildApiURL(b, p string) string {
 	return fmt.Sprintf("%s/api/%s", strings.TrimSuffix(b, "/"), strings.TrimPrefix(p, "/"))
 }
 
 func (c AppContext) LoadHostedAppList() {
+	b := appBaseURL()
 	c.Async(func() {
-		b := app.Window().URL()
-		b.Path = ""
-		l, _ := HostedAppList(b.String())
+		l, _ := HostedAppList(b)
 		c.SetState(StateKeyUserList, l.Data)
 	})
 }
 func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (err error) {
-	u := app.Window().URL()
-	u.Path = ""
+	u := appBaseURL()
 
 	r := &models.ApiResult{}
-	err = PutHostedApp(u.String(), id, payload, &r)
+	err = PutHostedApp(u, id, payload, &r)
 	return
+}
+func (c AppContext) LoadUserList() {
+
+}
+func (c AppContext) ToggleUserApp(userId, appID string, selected bool, cb func()) {
+	b := appBaseURL()
+	c.Async(func() {
+		var err error
+		r := models.ApiResult{}
+		if selected {
+			err = RemoveUserApp(userId, appID, b, r)
+		} else {
+			err = AssignUserApp(userId, appID, b, r)
+		}
+		if err != nil {
+			helpers.AppLogf("%v", err)
+		} else if cb != nil {
+			cb()
+		}
+	})
 }

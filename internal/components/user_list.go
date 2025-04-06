@@ -1,9 +1,7 @@
 package components
 
 import (
-	"fmt"
 	"strings"
-	"time"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
 	"github.com/ajaxe/traefik-auth-manager/internal/models"
@@ -72,48 +70,4 @@ func (u *UserList) appMap() map[string]*models.HostedApplication {
 	u.appMapInternal = m
 
 	return m
-}
-
-type UserListItem struct {
-	app.Compo
-	user    *models.AppUser
-	allApps map[string]*models.HostedApplication
-}
-
-func (ul *UserListItem) Render() app.UI {
-	i := fmt.Sprintf("c%v", time.Now().UnixMilli())
-	return &CardListItem{
-		Title: ul.user.UserName,
-		actionItems: []app.UI{
-			&UserListItemEdit{user: ul.user},
-			&UserDeleteBtn{user: ul.user},
-		},
-		content: []app.UI{
-			&UserAppAssignment{
-				userApps: ul.user.Applications,
-				ID:       i,
-				allApps:  ul.allApps,
-				userId:   ul.user.ID.Hex(),
-			},
-		},
-	}
-}
-
-type UserListItemEdit struct {
-	app.Compo
-	user *models.AppUser
-}
-
-func (u *UserListItemEdit) Render() app.UI {
-	return app.Div().
-		Class("me-1").
-		Body(
-			app.Button().Class("btn btn-light").
-				OnClick(func(ctx app.Context, e app.Event) {
-					ctx.NewActionWithValue(actionUserEdit, u.user)
-				}).
-				Body(
-					app.I().Class("bi bi-pencil-square"),
-				),
-		)
 }
