@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
+	"strings"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/db"
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
@@ -29,6 +31,10 @@ func (h *hostedAppHandler) HostedApps() echo.HandlerFunc {
 		if err != nil {
 			return
 		}
+
+		sort.Slice(d, func(i, j int) bool {
+			return strings.ToLower(d[i].Name) < strings.ToLower(d[j].Name)
+		})
 
 		return c.JSON(http.StatusOK, &models.HostedAppListResult{
 			ApiResult: models.ApiResult{

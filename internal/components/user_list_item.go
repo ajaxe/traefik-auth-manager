@@ -5,14 +5,12 @@ import (
 	"time"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
 type UserListItem struct {
 	app.Compo
-	user    *frontend.AppUserView
-	allApps map[string]*models.HostedApplication
+	user *frontend.AppUserView
 }
 
 func (ul *UserListItem) Render() app.UI {
@@ -25,10 +23,8 @@ func (ul *UserListItem) Render() app.UI {
 		},
 		content: []app.UI{
 			&UserAppAssignment{
-				userApps: ul.user.Applications,
-				ID:       i,
-				allApps:  ul.allApps,
-				userId:   ul.user.ID.Hex(),
+				ID:   i,
+				user: ul.user,
 			},
 		},
 	}

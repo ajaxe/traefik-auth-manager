@@ -1,21 +1,14 @@
 package components
 
 import (
-	"sort"
-	"strings"
-
 	"github.com/ajaxe/traefik-auth-manager/internal/frontend"
-	"github.com/ajaxe/traefik-auth-manager/internal/models"
 	"github.com/maxence-charriere/go-app/v10/pkg/app"
 )
 
 type UserAppAssignment struct {
 	app.Compo
-	ID       string
-	userApps []*models.ApplicationIdentifier
-	allApps  map[string]*models.HostedApplication
-	userId   string
-	user     *frontend.AppUserView
+	ID   string
+	user *frontend.AppUserView
 }
 
 func (u *UserAppAssignment) Render() app.UI {
@@ -28,27 +21,14 @@ func (u *UserAppAssignment) Render() app.UI {
 }
 func (u *UserAppAssignment) listApps() []app.UI {
 	l := []app.UI{}
-	a := make(map[string]bool)
 
-	for _, r := range u.userApps {
-		a[strings.ToLower(r.Name)] = true
-	}
-
-	keys := []string{}
-	for k := range u.allApps {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		_, ok := a[k]
+	for _, k := range u.user.Apps() {
 
 		btn := &UserAppAssignmentBtn{
-			ID:       u.allApps[k].ID.Hex(),
-			selected: ok,
-			text:     u.allApps[k].Name,
-			userId:   u.userId,
+			ID:       k.HostAppId.Hex(),
+			selected: k.Selected,
+			text:     k.Name,
+			userId:   k.UserID,
 		}
 		l = append(l, btn)
 

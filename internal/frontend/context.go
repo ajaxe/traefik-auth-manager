@@ -74,10 +74,7 @@ func (c AppContext) loadUserList() {
 	c.Async(func() {
 		d, _ := UserList(b)
 		h, _ := HostedAppList(b)
-		c.SetState(StateKeyUserList, UserListViewData{
-			Users: d.Data,
-			Apps:  h.Data,
-		})
+		c.SetState(StateKeyUserList, NewUserListViewData(d.Data, h.Data))
 	})
 }
 func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (err error) {

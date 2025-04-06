@@ -11,7 +11,7 @@ import (
 
 type UserEditModal struct {
 	app.Compo
-	user            *models.AppUser
+	user            *frontend.AppUserView
 	show            bool
 	password        string
 	confirmPassword string
@@ -39,7 +39,7 @@ func (u *UserEditModal) Render() app.UI {
 		Show:    u.show,
 	}
 }
-func (u *UserEditModal) setData(d *models.AppUser) {
+func (u *UserEditModal) setData(d *frontend.AppUserView) {
 	u.show = true
 	u.user = d
 	u.password = ""
@@ -47,7 +47,7 @@ func (u *UserEditModal) setData(d *models.AppUser) {
 	u.formResult = nil
 }
 func (u *UserEditModal) showModal(ctx app.Context, a app.Action) {
-	d, ok := a.Value.(*models.AppUser)
+	d, ok := a.Value.(*frontend.AppUserView)
 	helpers.AppLog(ok, d)
 
 	u.show = true
@@ -57,7 +57,7 @@ func (u *UserEditModal) showModal(ctx app.Context, a app.Action) {
 }
 func (u *UserEditModal) showAddModal(ctx app.Context, a app.Action) {
 	u.show = true
-	u.setData(&models.AppUser{})
+	u.setData(&frontend.AppUserView{})
 	u.op = "add"
 
 	ctx.Update()
