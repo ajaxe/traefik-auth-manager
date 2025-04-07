@@ -77,18 +77,18 @@ func (c AppContext) loadUserList() {
 		c.SetState(StateKeyUserList, NewUserListViewData(d.Data, h.Data))
 	})
 }
-func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (err error) {
+func (c AppContext) UpdateHostedApp(id string, payload models.HostedApplication) (r models.ApiResult, err error) {
 	u := appBaseURL()
 
-	r := &models.ApiResult{}
+	r = models.ApiResult{}
 	err = PutHostedApp(u, id, payload, &r)
 	return
 }
 
-func (c AppContext) AddHostedApp(payload models.HostedApplication) (err error) {
+func (c AppContext) AddHostedApp(payload models.HostedApplication) (r models.ApiResult, err error) {
 	u := appBaseURL()
 
-	r := &models.ApiResult{}
+	r = models.ApiResult{}
 	err = PostHostedApp(u, payload, &r)
 	return
 }

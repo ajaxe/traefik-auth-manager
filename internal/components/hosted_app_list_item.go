@@ -17,7 +17,7 @@ type HostedAppListItem struct {
 	originalData *models.HostedApplication
 	formResult   *models.ApiResult
 	onCancel     func(app.Context)
-	onSave       func(app.Context)
+	onSave       func(app.Context) models.ApiResult
 }
 
 func (h *HostedAppListItem) OnMount(ctx app.Context) {
@@ -192,14 +192,20 @@ func (h *HostedAppListItem) handleSave(ctx app.Context, e app.Event) {
 	if op == nil {
 		op = h.defaultOnSave
 	}
-	op(ctx)
+
+	r := op(ctx)
+
+	if r.Success {
+		frontend.NewAppContext(ctx).LoadData(frontend.StateKeyHostedAppList)
+	} else {
+		h.formResult = &r
+	}
 }
-func (h *HostedAppListItem) defaultOnSave(ctx app.Context) {
-	err := frontend.NewAppContext(ctx).UpdateHostedApp(h.originalData.ID.Hex(), *h.Happ)
+func (h *HostedAppListItem) defaultOnSave(ctx app.Context) models.ApiResult {
+	r, err := frontend.NewAppContext(ctx).UpdateHostedApp(h.originalData.ID.Hex(), *h.Happ)
 
 	if err != nil {
-		return
+		return models.NewGenericErrApiResult(err)
 	}
-
-	frontend.NewAppContext(ctx).LoadData(frontend.StateKeyHostedAppList)
+	return r
 }

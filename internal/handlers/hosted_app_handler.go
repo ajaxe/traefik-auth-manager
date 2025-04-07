@@ -46,6 +46,25 @@ func (h *hostedAppHandler) HostedApps() echo.HandlerFunc {
 }
 func (h *hostedAppHandler) CreateHostedApps() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
+		var d models.HostedApplication
+		if err := c.Bind(&d); err != nil {
+			return helpers.ErrInvalidData(err)
+		}
+		d.ID = bson.NewObjectID()
+
+		err = h.validate(d)
+		if err != nil {
+			return err
+		}
+
+		existing, err := db.HostedApplicationByServiceToken(d.ServiceToken)
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+		if existing != nil {
+			return helpers.NewAppError(http.StatusBadRequest, "Service token already exists.", nil)
+		}
+
 		return c.String(http.StatusOK, "Noop")
 	}
 }
@@ -85,16 +104,18 @@ func (h *hostedAppHandler) UpdateHostedApp(p apiParam) echo.HandlerFunc {
 }
 func (h *hostedAppHandler) validate(m models.HostedApplication) error {
 	if m.Name == "" {
-		return helpers.ErrAppRequired("Hosted app name")
+		return helpers.ErrAppRequired("Service name")
 	}
 	if m.ServiceToken == "" {
-		return helpers.ErrAppRequired("Hosted app service token")
+		return helpers.ErrAppRequired("Service token")
 	}
 	if m.ServiceURL == "" {
-		return helpers.ErrAppRequired("Hosted app service URL")
+		return helpers.ErrAppRequired("Service URL")
 	}
-	if _, err := url.Parse(m.ServiceURL); err != nil {
+	_, err := url.ParseRequestURI(m.ServiceURL)
+	if err != nil {
 		return helpers.NewAppError(http.StatusBadRequest, "Invalid service URL.", err)
 	}
+
 	return nil
 }

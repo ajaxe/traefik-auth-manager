@@ -19,18 +19,18 @@ func TestHostedAppHandler_Validation_OK(t *testing.T) {
 	}
 }
 
-func TestHostedAppHandler_ValidateName_ReturnBadRequest(t *testing.T) {
+func TestHostedAppHandler_EmptyServiceName_ReturnBadRequest(t *testing.T) {
 	sut := &hostedAppHandler{}
 	data := correctHostedAppModel()
 	data.Name = ""
 
 	err := sut.validate(data)
 
-	assertRequriedErrMessage(t, "app name", err)
+	assertRequriedErrMessage(t, "service name", err)
 
 	assertHttpError(t, http.StatusBadRequest, err)
 }
-func TestHostedAppHandler_ValidateServiceToken_ReturnBadRequest(t *testing.T) {
+func TestHostedAppHandler_EmptyServiceToken_ReturnBadRequest(t *testing.T) {
 	sut := &hostedAppHandler{}
 	data := correctHostedAppModel()
 	data.ServiceToken = ""
@@ -41,7 +41,7 @@ func TestHostedAppHandler_ValidateServiceToken_ReturnBadRequest(t *testing.T) {
 
 	assertHttpError(t, http.StatusBadRequest, err)
 }
-func TestHostedAppHandler_ValidateServiceURL_ReturnBadRequest(t *testing.T) {
+func TestHostedAppHandler_EmptyServiceURL_ReturnBadRequest(t *testing.T) {
 	sut := &hostedAppHandler{}
 	data := correctHostedAppModel()
 	data.ServiceURL = ""
@@ -49,6 +49,15 @@ func TestHostedAppHandler_ValidateServiceURL_ReturnBadRequest(t *testing.T) {
 	err := sut.validate(data)
 
 	assertRequriedErrMessage(t, "url", err)
+
+	assertHttpError(t, http.StatusBadRequest, err)
+}
+func TestHostedAppHandler_InvalidServiceURL_ReturnBadRequest(t *testing.T) {
+	sut := &hostedAppHandler{}
+	data := correctHostedAppModel()
+	data.ServiceURL = "z"
+
+	err := sut.validate(data)
 
 	assertHttpError(t, http.StatusBadRequest, err)
 }
@@ -64,7 +73,10 @@ func correctHostedAppModel() models.HostedApplication {
 }
 
 func assertRequriedErrMessage(t *testing.T, errToken string, err error) {
-	m := err.Error()
+	m := ""
+	if err != nil {
+		m = err.Error()
+	}
 	if !(strings.Contains(m, "is required.") && strings.Contains(m, errToken)) {
 		t.Errorf("Expect error to contain '%s', got: '%s'", errToken, m)
 	}
@@ -73,6 +85,7 @@ func assertRequriedErrMessage(t *testing.T, errToken string, err error) {
 func assertHttpError(t *testing.T, httpStatus int, err error) {
 	if err == nil {
 		t.Error("Expect error")
+		return
 	}
 	ap, ok := err.(*helpers.AppError)
 	if !ok {

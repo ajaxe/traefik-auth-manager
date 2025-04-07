@@ -52,12 +52,12 @@ func (u *HostedAppAddBtn) newApp() app.UI {
 	}
 	return newHostedAppCardItemWithItem(&itm)
 }
-func (u *HostedAppAddBtn) onSave(ctx app.Context) {
-	err := frontend.NewAppContext(ctx).AddHostedApp(*u.instance)
-	defer func() { u.hide() }()
+func (u *HostedAppAddBtn) onSave(ctx app.Context) models.ApiResult {
+	r, err := frontend.NewAppContext(ctx).AddHostedApp(*u.instance)
+
 	if err != nil {
-		return
+		return models.NewGenericErrApiResult(err)
 	}
 
-	frontend.NewAppContext(ctx).LoadData(frontend.StateKeyHostedAppList)
+	return r
 }

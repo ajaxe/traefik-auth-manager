@@ -57,3 +57,20 @@ func UpdateHostedApplication(h *models.HostedApplication) (err error) {
 
 	return
 }
+func HostedApplicationByServiceToken(serviceToken string) (s *models.HostedApplication, err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	f := bson.D{{"service_token", serviceToken}}
+	res := c.Database(clientInstance.DbName).
+		Collection(collectionHostedApps).
+		FindOne(context.TODO(), f)
+
+	s = &models.HostedApplication{}
+
+	err = res.Decode(s)
+
+	return
+}

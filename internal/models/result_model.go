@@ -1,6 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type ApiResult struct {
 	Success      bool   `json:"success"`
@@ -17,5 +20,12 @@ func NewApiIDResult(id bson.ObjectID) *ApiIDResult {
 			Success: true,
 		},
 		ID: id,
+	}
+}
+func NewGenericErrApiResult(err error) ApiResult {
+	helpers.AppLogf("error: %s", err.Error())
+	return ApiResult{
+		Success:      false,
+		ErrorMessage: "Something went wrong.",
 	}
 }
