@@ -59,5 +59,9 @@ func (u *HostedAppAddBtn) onSave(ctx app.Context) models.ApiResult {
 		return models.NewGenericErrApiResult(err)
 	}
 
+	if r.Success {
+		u.hide()
+	}
+
 	return r
 }

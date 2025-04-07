@@ -80,21 +80,11 @@ func UpdateUserHostedApps(u *models.AppUser) (err error) {
 }
 
 func InsertAppUser(u *models.AppUser) (id bson.ObjectID, err error) {
-	c, err := NewClient()
-	if err != nil {
-		return
-	}
 
 	id = bson.NewObjectID()
 	u.ID = id
 
-	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
-	defer cancel()
-
-	_, err = c.Database(clientInstance.DbName).
-		Collection(collectionAppUser).
-		InsertOne(ctx, u)
-
+	err = insertRecord(u, collectionAppUser)
 	return
 }
 func DeleteAppUserByID(id bson.ObjectID) error {

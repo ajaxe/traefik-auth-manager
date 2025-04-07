@@ -53,3 +53,19 @@ func deleteByID(id bson.ObjectID, collection string) (err error) {
 
 	return
 }
+
+func insertRecord(u any, collection string) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	defer cancel()
+
+	_, err = c.Database(clientInstance.DbName).
+		Collection(collection).
+		InsertOne(ctx, u)
+
+	return
+}

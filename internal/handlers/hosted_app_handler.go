@@ -50,22 +50,23 @@ func (h *hostedAppHandler) CreateHostedApps() echo.HandlerFunc {
 		if err := c.Bind(&d); err != nil {
 			return helpers.ErrInvalidData(err)
 		}
-		d.ID = bson.NewObjectID()
 
 		err = h.validate(d)
 		if err != nil {
 			return err
 		}
 
-		existing, err := db.HostedApplicationByServiceToken(d.ServiceToken)
-		if err != nil {
-			return helpers.ErrAppGeneric(err)
-		}
-		if existing != nil {
+		existing, _ := db.HostedApplicationByServiceToken(d.ServiceToken)
+		if existing != nil && existing.ServiceToken == d.ServiceToken {
 			return helpers.NewAppError(http.StatusBadRequest, "Service token already exists.", nil)
 		}
 
-		return c.String(http.StatusOK, "Noop")
+		id, err := db.InsertHostedApplication(&d)
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+
+		return c.JSON(http.StatusOK, models.NewApiIDResult(id))
 	}
 }
 func (h *hostedAppHandler) UpdateHostedApp(p apiParam) echo.HandlerFunc {

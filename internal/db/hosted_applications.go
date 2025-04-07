@@ -74,3 +74,11 @@ func HostedApplicationByServiceToken(serviceToken string) (s *models.HostedAppli
 
 	return
 }
+func InsertHostedApplication(u *models.HostedApplication) (id bson.ObjectID, err error) {
+
+	id = bson.NewObjectID()
+	u.ID = id
+
+	err = insertRecord(u, collectionHostedApps)
+	return
+}
