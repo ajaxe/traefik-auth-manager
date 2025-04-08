@@ -58,5 +58,8 @@ func itemActions(i *HostedAppListItem) []app.UI {
 			ctx.NewActionWithValue(actionHostedAppEdit, i.Happ.ID.Hex())
 		},
 	}
-	return []app.UI{b}
+	d := &HostedAppDeleteBtn{
+		Happ: i.Happ,
+	}
+	return []app.UI{b, d}
 }

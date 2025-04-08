@@ -207,5 +207,6 @@ func (h *HostedAppListItem) defaultOnSave(ctx app.Context) models.ApiResult {
 	if err != nil {
 		return models.NewGenericErrApiResult(err)
 	}
+	h.readonlyView(true)
 	return r
 }

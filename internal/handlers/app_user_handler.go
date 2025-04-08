@@ -145,7 +145,12 @@ func (h *appUserHandler) userApps() (u []*models.AppUser, err error) {
 	}
 	for _, o := range u {
 		for _, apps := range o.Applications {
-			apps.Name = appMap[apps.HostAppId.Hex()].Name
+			e, ok := appMap[apps.HostAppId.Hex()]
+			if ok {
+				apps.Name = e.Name
+			} else {
+				_ = apps.HostAppId.Hex()
+			}
 		}
 	}
 	return

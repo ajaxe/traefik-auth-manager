@@ -92,6 +92,14 @@ func (c AppContext) AddHostedApp(payload models.HostedApplication) (r models.Api
 	err = PostHostedApp(u, payload, &r)
 	return
 }
+func (c AppContext) RemoveHostedApp(appID string) {
+	b := appBaseURL()
+	c.Async(func() {
+		r := models.ApiResult{}
+		_ = RemoveHostedApp(appID, b, &r)
+		c.LoadData(StateKeyHostedAppList)
+	})
+}
 func (c AppContext) ToggleUserApp(userId, appID string, selected bool, cb func()) {
 	b := appBaseURL()
 	c.Async(func() {
@@ -107,5 +115,13 @@ func (c AppContext) ToggleUserApp(userId, appID string, selected bool, cb func()
 		} else if cb != nil {
 			cb()
 		}
+	})
+}
+func (c AppContext) RemoveUser(userID string) {
+	b := appBaseURL()
+	c.Async(func() {
+		r := models.ApiResult{}
+		_ = RemoveUser(userID, b, &r)
+		c.LoadData(StateKeyUserList)
 	})
 }

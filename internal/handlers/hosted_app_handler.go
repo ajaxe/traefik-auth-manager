@@ -23,6 +23,7 @@ func AddHostedAppHandlers(e *echo.Group) {
 	e.GET("/hosted-apps", h.HostedApps())
 	e.POST("/hosted-apps", h.CreateHostedApps())
 	e.PUT(fmt.Sprintf("/hosted-apps/%s", idParam.Param()), h.UpdateHostedApp(idParam))
+	e.DELETE(fmt.Sprintf("/hosted-apps/%s", idParam.Param()), h.DeleteHostedApp(idParam))
 }
 
 func (h *hostedAppHandler) HostedApps() echo.HandlerFunc {
@@ -119,4 +120,35 @@ func (h *hostedAppHandler) validate(m models.HostedApplication) error {
 	}
 
 	return nil
+}
+func (h *hostedAppHandler) DeleteHostedApp(p apiParam) echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		i := c.Param(idParam.String())
+
+		id, err := bson.ObjectIDFromHex(i)
+		if err != nil {
+			return helpers.ErrAppBadID(err)
+		}
+
+		if id.IsZero() {
+			return helpers.ErrAppRequired("Host app ID")
+		}
+
+		app, err := db.HostedApplicationByID(i)
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+
+		err = db.DeleteHostedAppByID(id)
+		if err != nil {
+			return helpers.ErrAppGeneric(err)
+		}
+
+		return c.JSON(http.StatusAccepted, &models.HostedAppListResult{
+			ApiResult: models.ApiResult{
+				Success: true,
+			},
+			Data: []*models.HostedApplication{app},
+		})
+	}
 }

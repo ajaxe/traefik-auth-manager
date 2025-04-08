@@ -22,3 +22,6 @@ func PostHostedApp(u string, payload, response interface{}) error {
 func PutHostedApp(u, id string, payload, response interface{}) error {
 	return httpPut(buildApiURL(u, fmt.Sprintf("/hosted-apps/%s", id)), payload, response)
 }
+func RemoveHostedApp(id, u string, response interface{}) error {
+	return httpDelete(buildApiURL(u, fmt.Sprintf("/hosted-apps/%s", id)), response)
+}

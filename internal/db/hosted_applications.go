@@ -82,3 +82,7 @@ func InsertHostedApplication(u *models.HostedApplication) (id bson.ObjectID, err
 	err = insertRecord(u, collectionHostedApps)
 	return
 }
+
+func DeleteHostedAppByID(id bson.ObjectID) error {
+	return deleteByID(id, collectionHostedApps)
+}

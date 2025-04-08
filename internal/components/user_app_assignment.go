@@ -53,7 +53,7 @@ func (u *UserAppAssignmentBtn) Render() app.UI {
 	return app.Button().
 		DataSet("app-id", u.ID).
 		DataSet("selected", u.selected).
-		Class("me-1 btn btn-sm " + c).
+		Class("me-1 mb-1 btn btn-sm " + c).
 		Text(u.text).
 		OnClick(u.click)
 }
