@@ -26,12 +26,16 @@ type FormText struct {
 	BindTo      any
 	InputType   string
 	Placeholder string
+	AllowCopy   bool
 }
 
 func (t *FormText) Render() app.UI {
 	c := "form-control"
 	if t.ReadOnly {
 		c += "-plaintext"
+	}
+	if t.AllowCopy {
+		c += " copy"
 	}
 	it := t.InputType
 	if it == "" {

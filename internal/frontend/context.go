@@ -125,3 +125,6 @@ func (c AppContext) RemoveUser(userID string) {
 		c.LoadData(StateKeyUserList)
 	})
 }
+func (c AppContext) CopyToClipboard(value string) {
+	app.Window().Get("navigator").Get("clipboard").Call("writeText", value)
+}

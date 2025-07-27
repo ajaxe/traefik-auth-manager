@@ -78,7 +78,9 @@ func (h *HostedAppListItem) serviceTokenUI() app.UI {
 						InputType:   "text",
 						ReadOnly:    h.ReadOnly,
 						Placeholder: "Not set",
+						AllowCopy:   true,
 					},
+					&CopyValueBtn{Value: h.Happ.ServiceToken, Visible: h.ReadOnly},
 					&FormLabel{
 						For:   id,
 						Label: "Service Token",

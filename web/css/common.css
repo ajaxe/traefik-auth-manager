@@ -20,3 +20,8 @@
 .user-list-action .dropdown-toggle::after {
   display: none;
 }
+
+.form-control-plaintext.copy {
+  width: 80% !important;
+  display: inline-block;
+}
