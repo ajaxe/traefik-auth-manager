@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package models
 
 import (
@@ -8,18 +10,6 @@ import (
 
 func init() {
 	gob.Register(&Session{})
-}
-
-type Session struct {
-	User SessionUser
-}
-
-type SessionUser struct {
-	Name    string
-	Sub     string
-	Email   string
-	Picture string
-	IdpName string
 }
 
 func NewSession(u *oidc.UserInfo) (s Session, err error) {
