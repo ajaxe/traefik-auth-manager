@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,16 +17,44 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
 	elog "github.com/labstack/gommon/log"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
+
+var traceProvider *sdktrace.TracerProvider
 
 func NewBackendApi() *echo.Echo {
 	appConfig := helpers.MustLoadDefaultAppConfig()
 
 	e := echo.New()
+
 	e.Logger.SetLevel(elog.INFO)
 	e.HTTPErrorHandler = handlers.AppErrorHandler()
 
+	if appConfig.Server.IsDev {
+		e.Debug = true
+	} else {
+		e.Debug = false
+		e.HideBanner = true
+		e.HidePort = true
+
+		var err error
+		traceProvider, err = initTracer()
+		if err != nil {
+			log.Fatal(err)
+		}
+		e.Logger.Info("setting up otelecho.Middleware")
+		e.Use(otelecho.Middleware("traefik_auth_manager",
+			otelecho.WithTracerProvider(traceProvider),
+		))
+	}
+
+	// e.Use(tracerMiddleware)
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
@@ -86,7 +115,34 @@ func Start(e *echo.Echo) {
 	if err := db.Terminate(ctx); err != nil {
 		e.Logger.Errorf("failed to terminate db connection: %v", err)
 	}
+	if traceProvider != nil {
+		if err := traceProvider.Shutdown(ctx); err != nil {
+			e.Logger.Errorf("failed to shutdown trace provider: %v", err)
+		}
+	}
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal("failed to shutdown server: %v", err)
 	}
+}
+
+func initTracer() (*sdktrace.TracerProvider, error) {
+	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if otelEndpoint == "" {
+		log.Println("CRITICAL DEBUG: OTEL_EXPORTER_OTLP_ENDPOINT environment variable is NOT SET or is EMPTY.")
+	} else {
+		log.Printf("SUCCESS DEBUG: Found OTEL_EXPORTER_OTLP_ENDPOINT: %s", otelEndpoint)
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	return tp, nil
 }

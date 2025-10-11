@@ -17,6 +17,7 @@ type AppConfig struct {
 		Port     string `mapstructure:"port"`
 		CertFile string `mapstructure:"cert_file"`
 		KeyFile  string `mapstructure:"key_file"`
+		IsDev    bool   `mapstructure:"is_dev"`
 	} `mapstructure:"server"`
 	OAuth struct {
 		Authority           string `mapstructure:"authority"`
