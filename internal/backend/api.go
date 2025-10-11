@@ -52,7 +52,7 @@ func NewBackendApi() *echo.Echo {
 		if err != nil {
 			log.Fatal(err)
 		}
-		e.Logger.Info("setting up otelecho.Middleware")
+		e.Logger.Infof("setting up otelecho.Middleware: name: %s", appConfig.Tracing.ServiceName)
 		e.Use(otelecho.Middleware(appConfig.Tracing.ServiceName,
 			otelecho.WithTracerProvider(traceProvider),
 		))

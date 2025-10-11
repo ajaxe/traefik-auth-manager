@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ajaxe/traefik-auth-manager/internal/helpers"
@@ -19,7 +20,7 @@ func Test_Integration_Read_AppUsers(t *testing.T) {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	da := NewAppUserDataAccess()()
+	da := NewAppUserDataAccess()(context.Background())
 	u, err := da.AppUsers()
 	if err != nil {
 		t.Fatalf("failed to read collection '%s': %v", collectionAppUser, err)
@@ -48,7 +49,7 @@ func Test_ExistingUser_OK(t *testing.T) {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	da := NewAppUserDataAccess()()
+	da := NewAppUserDataAccess()(context.Background())
 	d, err := da.AppUserByUsername("admin")
 	if err != nil {
 		t.Fatalf("failed to read app user: %v", err)
@@ -73,7 +74,7 @@ func Test_NonExistingUser_OK(t *testing.T) {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	da := NewAppUserDataAccess()()
+	da := NewAppUserDataAccess()(context.Background())
 	_, err = da.AppUserByUsername("not_existing_user")
 
 	if err != mongo.ErrNoDocuments {

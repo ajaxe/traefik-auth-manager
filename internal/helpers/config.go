@@ -75,7 +75,7 @@ func LoadAppConfig(path, name string) (config AppConfig, err error) {
 	viper.SetConfigName(name)
 	viper.SetEnvPrefix("app")
 
-	viper.SetDefault("tracing.service-name", "traefik-auth-manager")
+	viper.SetDefault("tracing.service_name", "traefik-auth-manager")
 
 	viper.AutomaticEnv()
 

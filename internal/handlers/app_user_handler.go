@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"slices"
@@ -14,7 +15,7 @@ import (
 
 type appUserHandler struct {
 	logger echo.Logger
-	dbFn   func() *db.AppUserDataAccess
+	dbFn   func(context.Context) *db.AppUserDataAccess
 }
 
 func AddAppUserHandlers(e *echo.Group, l echo.Logger) {
@@ -55,7 +56,7 @@ func (h *appUserHandler) CreateUser() echo.HandlerFunc {
 			return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
 		}
 
-		da := h.dbFn()
+		da := h.dbFn(c.Request().Context())
 		e, _ := da.AppUserByUsername(u.UserName)
 		if e.UserName != "" { //err != mongo.ErrNoDocuments {
 			return helpers.NewAppError(http.StatusBadRequest, fmt.Sprintf("User '%s' already exists.", u.UserName), nil)
@@ -89,7 +90,7 @@ func (h *appUserHandler) UpdateUser(idParam apiParam) echo.HandlerFunc {
 		}
 		d.ID = id
 
-		if err := h.updatePassword(&d); err != nil {
+		if err := h.updatePassword(&d, c.Request().Context()); err != nil {
 			return err
 		}
 
@@ -108,7 +109,7 @@ func (h *appUserHandler) DeleteUser(idParam apiParam) echo.HandlerFunc {
 			return helpers.NewAppError(http.StatusBadRequest, "Invalid ID.", err)
 		}
 
-		da := h.dbFn()
+		da := h.dbFn(c.Request().Context())
 		err = da.DeleteAppUserByID(id)
 
 		if err != nil {
@@ -121,7 +122,7 @@ func (h *appUserHandler) DeleteUser(idParam apiParam) echo.HandlerFunc {
 
 func (h *appUserHandler) Users() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		u, err := h.userApps()
+		u, err := h.userApps(c.Request().Context())
 		if err != nil {
 			return err
 		}
@@ -135,8 +136,8 @@ func (h *appUserHandler) Users() echo.HandlerFunc {
 	}
 }
 
-func (h *appUserHandler) userApps() (u []*models.AppUser, err error) {
-	da := h.dbFn()
+func (h *appUserHandler) userApps(ctx context.Context) (u []*models.AppUser, err error) {
+	da := h.dbFn(ctx)
 	u, err = da.AppUsers()
 	if err != nil {
 		return
@@ -162,7 +163,7 @@ func (h *appUserHandler) userApps() (u []*models.AppUser, err error) {
 	return
 }
 
-func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
+func (h *appUserHandler) updatePassword(d *models.AppUserChange, ctx context.Context) error {
 
 	err := h.validatePassword(d.Password, d.ConfirmPassword)
 	if err != nil {
@@ -174,7 +175,7 @@ func (h *appUserHandler) updatePassword(d *models.AppUserChange) error {
 	if err != nil {
 		return helpers.ErrAppGeneric(fmt.Errorf("error generating hash: %v", err))
 	}
-	da := h.dbFn()
+	da := h.dbFn(ctx)
 	err = da.UpdatePassword(&models.AppUser{
 		ID:       d.ID,
 		Password: hash,
@@ -199,7 +200,7 @@ func (h *appUserHandler) removeUserApp(idParam, appIdParam apiParam) echo.Handle
 		if appId == "" {
 			return helpers.NewAppError(http.StatusBadRequest, "Invalid app id", nil)
 		}
-		da := h.dbFn()
+		da := h.dbFn(c.Request().Context())
 		existing, err := da.AppUserByID(id)
 		if err != nil || existing == nil {
 			return helpers.NewAppError(http.StatusBadRequest, "User does not exist", err)
@@ -235,7 +236,7 @@ func (h *appUserHandler) assignUserApp(idParam, appIdParam apiParam) echo.Handle
 			return helpers.NewAppError(http.StatusBadRequest, "Invalid app id", nil)
 		}
 
-		da := h.dbFn()
+		da := h.dbFn(c.Request().Context())
 		existing, err := da.AppUserByID(id)
 		if err != nil || existing == nil {
 			return helpers.NewAppError(http.StatusBadRequest, "User does not exist", err)

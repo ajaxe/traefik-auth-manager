@@ -8,23 +8,25 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func NewAppUserDataAccess() func() *AppUserDataAccess {
-	return func() *AppUserDataAccess {
+func NewAppUserDataAccess() func(context.Context) *AppUserDataAccess {
+	return func(ctx context.Context) *AppUserDataAccess {
 		c := newAppClient()
 		return &AppUserDataAccess{
 			client: c.Client,
+			ctx:    ctx,
 		}
 	}
 }
 
 type AppUserDataAccess struct {
 	client *mongo.Client
+	ctx    context.Context
 }
 
 func (c *AppUserDataAccess) AppUsers() (d []*models.AppUser, err error) {
 	var fn dbValFunc = func() any { return &models.AppUser{} }
 
-	r, err := readAllCollectionWithClient(c.client, fn, collectionAppUser)
+	r, err := readAllCollectionWithClient(c.client, fn, collectionAppUser, c.ctx)
 
 	d = make([]*models.AppUser, len(r))
 	for i, v := range r {
