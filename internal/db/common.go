@@ -4,16 +4,12 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type dbValFunc func() any
 
-func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
-	c, err := NewClient()
-	if err != nil {
-		return
-	}
-
+func readAllCollectionWithClient(c *mongo.Client, v dbValFunc, collection string) (d []any, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()
 
@@ -36,13 +32,16 @@ func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
 
 	return
 }
-
-func deleteByID(id bson.ObjectID, collection string) (err error) {
+func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
 	c, err := NewClient()
 	if err != nil {
 		return
 	}
 
+	return readAllCollectionWithClient(c, v, collection)
+}
+
+func deleteByIDWithClient(c *mongo.Client, id bson.ObjectID, collection string) (err error) {
 	f := bson.D{{"_id", id}}
 
 	res, err := c.Database(clientInstance.DbName).
@@ -53,13 +52,16 @@ func deleteByID(id bson.ObjectID, collection string) (err error) {
 
 	return
 }
-
-func insertRecord(u any, collection string) (err error) {
+func deleteByID(id bson.ObjectID, collection string) (err error) {
 	c, err := NewClient()
 	if err != nil {
 		return
 	}
 
+	return deleteByIDWithClient(c, id, collection)
+}
+
+func insertRecordWithClient(c *mongo.Client, u any, collection string) (err error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
 	defer cancel()
 
@@ -68,4 +70,12 @@ func insertRecord(u any, collection string) (err error) {
 		InsertOne(ctx, u)
 
 	return
+}
+func insertRecord(u any, collection string) (err error) {
+	c, err := NewClient()
+	if err != nil {
+		return
+	}
+
+	return insertRecordWithClient(c, u, collection)
 }

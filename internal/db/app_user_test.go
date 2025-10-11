@@ -14,12 +14,13 @@ func Test_Integration_Read_AppUsers(t *testing.T) {
 		t.Fatalf("failed to read config: %v", err)
 	}
 
-	_, err = NewClientWithConfig(cfg)
+	_, err = newClientWithConfig(cfg)
 	if err != nil {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	u, err := AppUsers()
+	da := NewAppUserDataAccess()()
+	u, err := da.AppUsers()
 	if err != nil {
 		t.Fatalf("failed to read collection '%s': %v", collectionAppUser, err)
 	}
@@ -42,12 +43,13 @@ func Test_ExistingUser_OK(t *testing.T) {
 		t.Fatalf("failed to read config: %v", err)
 	}
 
-	_, err = NewClientWithConfig(cfg)
+	_, err = newClientWithConfig(cfg)
 	if err != nil {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	d, err := AppUserByUsername("admin")
+	da := NewAppUserDataAccess()()
+	d, err := da.AppUserByUsername("admin")
 	if err != nil {
 		t.Fatalf("failed to read app user: %v", err)
 	}
@@ -66,12 +68,13 @@ func Test_NonExistingUser_OK(t *testing.T) {
 		t.Fatalf("failed to read config: %v", err)
 	}
 
-	_, err = NewClientWithConfig(cfg)
+	_, err = newClientWithConfig(cfg)
 	if err != nil {
 		t.Fatalf("failed to create mongo client: %v", err)
 	}
 
-	_, err = AppUserByUsername("not_existing_user")
+	da := NewAppUserDataAccess()()
+	_, err = da.AppUserByUsername("not_existing_user")
 
 	if err != mongo.ErrNoDocuments {
 		t.Fatalf("failed to read app user: %v", err)

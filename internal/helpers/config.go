@@ -35,6 +35,10 @@ type AppConfig struct {
 		ConnectionURI string `mapstructure:"connection_uri"`
 		DbName        string `mapstructure:"db_name"`
 	} `mapstructure:"database"`
+	Tracing struct {
+		Enabled     bool   `mapstructure:"enabled"`
+		ServiceName string `mapstructure:"service_name"`
+	}
 }
 
 func (a AppConfig) OAuthLoginRedirectURL() string {
@@ -70,6 +74,8 @@ func LoadAppConfig(path, name string) (config AppConfig, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName(name)
 	viper.SetEnvPrefix("app")
+
+	viper.SetDefault("tracing.service-name", "traefik-auth-manager")
 
 	viper.AutomaticEnv()
 

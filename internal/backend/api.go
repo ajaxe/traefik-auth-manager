@@ -23,7 +23,9 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 var traceProvider *sdktrace.TracerProvider
@@ -42,14 +44,16 @@ func NewBackendApi() *echo.Echo {
 		e.Debug = false
 		e.HideBanner = true
 		e.HidePort = true
+	}
 
+	if appConfig.Tracing.Enabled {
 		var err error
-		traceProvider, err = initTracer()
+		traceProvider, err = initTracer(appConfig.Tracing.ServiceName)
 		if err != nil {
 			log.Fatal(err)
 		}
 		e.Logger.Info("setting up otelecho.Middleware")
-		e.Use(otelecho.Middleware("traefik_auth_manager",
+		e.Use(otelecho.Middleware(appConfig.Tracing.ServiceName,
 			otelecho.WithTracerProvider(traceProvider),
 		))
 	}
@@ -125,7 +129,7 @@ func Start(e *echo.Echo) {
 	}
 }
 
-func initTracer() (*sdktrace.TracerProvider, error) {
+func initTracer(serviceName string) (*sdktrace.TracerProvider, error) {
 	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 	if otelEndpoint == "" {
 		log.Println("CRITICAL DEBUG: OTEL_EXPORTER_OTLP_ENDPOINT environment variable is NOT SET or is EMPTY.")
@@ -138,11 +142,26 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 	if err != nil {
 		return nil, err
 	}
+	res, err := resource.New(ctx,
+		resource.WithFromEnv(),
+		resource.WithProcess(),
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+		resource.WithAttributes(
+			// the service name used to display traces in backends
+			semconv.ServiceNameKey.String(serviceName),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
 	)
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{}, propagation.Baggage{}))
 	return tp, nil
 }

@@ -22,17 +22,26 @@ const (
 	writeTimeout = 30 * time.Second
 )
 
-var clientInstance struct {
+type AppClient struct {
 	Client *mongo.Client
 	DbName string
 }
 
+var clientInstance AppClient
+
 func NewClient() (*mongo.Client, error) {
 	cfg := helpers.MustLoadDefaultAppConfig()
-	return NewClientWithConfig(cfg)
+	return newClientWithConfig(cfg)
+}
+func newAppClient() AppClient {
+	if clientInstance.Client == nil {
+		cfg := helpers.MustLoadDefaultAppConfig()
+		newClientWithConfig(cfg)
+	}
+	return clientInstance
 }
 
-func NewClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
+func newClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
 	if clientInstance.Client != nil {
 		return clientInstance.Client, nil
 	}
