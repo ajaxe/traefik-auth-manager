@@ -14,7 +14,7 @@ func AddHealtcheck(e *echo.Echo) {
 		if err != nil {
 			return fmt.Errorf("failed connection to db: %v", err)
 		}
-		if err = db.Ping(); err != nil {
+		if err = db.Ping(c.Request().Context()); err != nil {
 			return fmt.Errorf("failed to ping db: %v", err)
 		}
 

@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
+	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 const (
@@ -57,7 +59,7 @@ func newClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
 		return nil, err
 	}
 
-	if err = pingClient(client); err != nil {
+	if err = pingClient(client, context.Background()); err != nil {
 		return nil, fmt.Errorf("ping faild to return in 2sec timeout: %v", err)
 	}
 
@@ -67,20 +69,35 @@ func newClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
 	return client, nil
 }
 
-func Ping() error {
-	return pingClient(clientInstance.Client)
+func Ping(ctx context.Context) error {
+	return pingClient(clientInstance.Client, ctx)
 }
-func pingClient(c *mongo.Client) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+func pingClient(c *mongo.Client, ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "pingClient")
+	defer span.End()
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
+	span.SetAttributes(
+		semconv.DBSystemMongoDB,
+		semconv.DBNamespaceKey.String(clientInstance.DbName),
+		semconv.DBOperationName("ping"),
+	)
+
 	if c == nil {
-		return fmt.Errorf("client must be instantiated before calling Ping")
+		err := fmt.Errorf("client must be instantiated before calling Ping")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 
 	err := c.Ping(ctx, readpref.Primary())
 	if err != nil {
-		return fmt.Errorf("ping failed with 2sec timeout: %v", err)
+		e := fmt.Errorf("ping failed with 2sec timeout: %v", err)
+		span.RecordError(e)
+		span.SetStatus(codes.Error, e.Error())
+		return e
 	}
 	return nil
 }
