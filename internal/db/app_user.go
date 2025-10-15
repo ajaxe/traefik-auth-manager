@@ -26,7 +26,7 @@ type AppUserDataAccess struct {
 func (c *AppUserDataAccess) AppUsers() (d []*models.AppUser, err error) {
 	var fn dbValFunc = func() any { return &models.AppUser{} }
 
-	r, err := readAllCollectionWithClient(c.client, fn, collectionAppUser, c.ctx)
+	r, err := readCollectionWithClient(c.client, fn, collectionAppUser, c.ctx)
 
 	d = make([]*models.AppUser, len(r))
 	for i, v := range r {
@@ -44,7 +44,7 @@ func (c *AppUserDataAccess) AppUserByID(id string) (s *models.AppUser, err error
 	f := bson.D{{"_id", hex}}
 	res := c.client.Database(clientInstance.DbName).
 		Collection(collectionAppUser).
-		FindOne(context.TODO(), f)
+		FindOne(c.ctx, f)
 
 	s = &models.AppUser{}
 
@@ -54,7 +54,7 @@ func (c *AppUserDataAccess) AppUserByID(id string) (s *models.AppUser, err error
 }
 func (c *AppUserDataAccess) UpdatePassword(u *models.AppUser) (err error) {
 	f := bson.D{{"_id", u.ID}}
-	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	ctx, cancel := context.WithTimeout(c.ctx, writeTimeout)
 	defer cancel()
 
 	update := bson.D{{"$set", bson.D{{"password", u.Password}}}}
@@ -67,7 +67,7 @@ func (c *AppUserDataAccess) UpdatePassword(u *models.AppUser) (err error) {
 }
 func (c *AppUserDataAccess) UpdateUserHostedApps(u *models.AppUser) (err error) {
 	f := bson.D{{"_id", u.ID}}
-	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+	ctx, cancel := context.WithTimeout(c.ctx, writeTimeout)
 	defer cancel()
 
 	update := bson.D{{"$set", bson.D{{"applications", u.Applications}}}}
@@ -92,7 +92,7 @@ func (c *AppUserDataAccess) AppUserByUsername(username string) (s *models.AppUse
 	f := bson.D{{"username", username}}
 	res := c.client.Database(clientInstance.DbName).
 		Collection(collectionAppUser).
-		FindOne(context.TODO(), f)
+		FindOne(c.ctx, f)
 
 	s = &models.AppUser{}
 

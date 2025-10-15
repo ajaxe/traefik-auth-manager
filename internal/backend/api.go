@@ -114,6 +114,10 @@ func Start(e *echo.Echo) {
 
 	// Wait for interrupt signal to gracefully shut down the server with a timeout of 10 seconds.
 	<-ctx.Done()
+	e.Logger.Info("shutting down server")
+	if ctx.Err() != nil {
+		e.Logger.Errorf("shutting down due to context error: %v", ctx.Err())
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := db.Terminate(ctx); err != nil {
@@ -125,18 +129,12 @@ func Start(e *echo.Echo) {
 		}
 	}
 	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal("failed to shutdown server: %v", err)
+		e.Logger.Errorf("failed to shutdown server: %v", err)
 	}
+	e.Logger.Info("shutdown procedure completed")
 }
 
 func initTracer(serviceName string) (*sdktrace.TracerProvider, error) {
-	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if otelEndpoint == "" {
-		log.Println("CRITICAL DEBUG: OTEL_EXPORTER_OTLP_ENDPOINT environment variable is NOT SET or is EMPTY.")
-	} else {
-		log.Printf("SUCCESS DEBUG: Found OTEL_EXPORTER_OTLP_ENDPOINT: %s", otelEndpoint)
-	}
-
 	ctx := context.Background()
 	exporter, err := otlptracegrpc.New(ctx)
 	if err != nil {

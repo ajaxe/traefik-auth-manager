@@ -15,7 +15,7 @@ type dbValFunc func() any
 
 var tracer = otel.Tracer("db")
 
-func readAllCollectionWithClient(c *mongo.Client, v dbValFunc, collection string, ct ...context.Context) (d []any, err error) {
+func readCollectionWithClient(c *mongo.Client, v dbValFunc, collection string, ct ...context.Context) (d []any, err error) {
 	var ctx context.Context
 	if len(ct) > 0 {
 		ctx = ct[0]
@@ -23,7 +23,7 @@ func readAllCollectionWithClient(c *mongo.Client, v dbValFunc, collection string
 		ctx = context.Background()
 	}
 
-	ctx, span := tracer.Start(ctx, "readAllCollection")
+	ctx, span := tracer.Start(ctx, "db.readCollection")
 	defer span.End()
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
@@ -56,16 +56,16 @@ func readAllCollectionWithClient(c *mongo.Client, v dbValFunc, collection string
 		}
 		d = append(d, r)
 	}
-	span.SetAttributes(attribute.Int("db.rows_affected", len(d)))
+	span.SetAttributes(attribute.Int("db.readCollection.rows_affected", len(d)))
 	return
 }
-func readAllCollection(v dbValFunc, collection string) (d []any, err error) {
+func readCollection(v dbValFunc, collection string) (d []any, err error) {
 	c, err := NewClient()
 	if err != nil {
 		return
 	}
 
-	return readAllCollectionWithClient(c, v, collection)
+	return readCollectionWithClient(c, v, collection)
 }
 
 func deleteByIDWithClient(c *mongo.Client, id bson.ObjectID, collection string) (err error) {

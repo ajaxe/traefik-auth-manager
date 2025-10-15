@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelmongo"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
@@ -48,10 +49,12 @@ func newClientWithConfig(c helpers.AppConfig) (*mongo.Client, error) {
 		return clientInstance.Client, nil
 	}
 
+	monitor := otelmongo.NewMonitor()
 	sAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().
 		ApplyURI(c.Database.ConnectionURI).
-		SetServerAPIOptions(sAPI)
+		SetServerAPIOptions(sAPI).
+		SetMonitor(monitor)
 
 	client, err := mongo.Connect(opts)
 

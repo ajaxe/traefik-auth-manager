@@ -10,7 +10,7 @@ import (
 func HostedApplications() (d []*models.HostedApplication, err error) {
 	var fn dbValFunc = func() any { return &models.HostedApplication{} }
 
-	r, err := readAllCollection(fn, collectionHostedApps)
+	r, err := readCollection(fn, collectionHostedApps)
 
 	d = make([]*models.HostedApplication, len(r))
 	for i, v := range r {
