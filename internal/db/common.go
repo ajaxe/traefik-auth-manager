@@ -5,29 +5,28 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type dbValFunc func() any
 
-var tracer = otel.Tracer("db")
+func packageTracer(ct context.Context) trace.Tracer {
+	return trace.SpanFromContext(ct).TracerProvider().Tracer("db")
+}
 
 func readCollectionWithClient(c *mongo.Client, v dbValFunc, collection string, ct ...context.Context) (d []any, err error) {
 	var ctx context.Context
 	if len(ct) > 0 {
 		ctx = ct[0]
 	} else {
-		ctx = context.Background()
+		ctx = context.TODO()
 	}
 
-	ctx, span := tracer.Start(ctx, "db.readCollection")
+	ctx, span := packageTracer(ctx).Start(ctx, "db.readCollection")
 	defer span.End()
-
-	ctx, cancel := context.WithTimeout(ctx, readTimeout)
-	defer cancel()
 
 	span.SetAttributes(
 		semconv.DBSystemMongoDB,
@@ -35,6 +34,9 @@ func readCollectionWithClient(c *mongo.Client, v dbValFunc, collection string, c
 		semconv.DBCollectionNameKey.String(collection),
 		semconv.DBOperationName("find"),
 	)
+
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	cur, err := c.Database(clientInstance.DbName).
 		Collection(collection).
@@ -59,14 +61,6 @@ func readCollectionWithClient(c *mongo.Client, v dbValFunc, collection string, c
 	span.SetAttributes(attribute.Int("db.readCollection.rows_affected", len(d)))
 	return
 }
-func readCollection(v dbValFunc, collection string) (d []any, err error) {
-	c, err := NewClient()
-	if err != nil {
-		return
-	}
-
-	return readCollectionWithClient(c, v, collection)
-}
 
 func deleteByIDWithClient(c *mongo.Client, id bson.ObjectID, collection string) (err error) {
 	f := bson.D{{"_id", id}}
@@ -88,13 +82,35 @@ func deleteByID(id bson.ObjectID, collection string) (err error) {
 	return deleteByIDWithClient(c, id, collection)
 }
 
-func insertRecordWithClient(c *mongo.Client, u any, collection string) (err error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), writeTimeout)
+func insertRecordWithClient(c *mongo.Client, u any, collection string, ct ...context.Context) (err error) {
+	var ctx context.Context
+	if len(ct) > 0 {
+		ctx = ct[0]
+	} else {
+		ctx = context.TODO()
+	}
+
+	ctx, span := packageTracer(ctx).Start(ctx, "db.insertRecord")
+	defer span.End()
+
+	span.SetAttributes(
+		semconv.DBSystemMongoDB,
+		semconv.DBNamespaceKey.String(clientInstance.DbName),
+		semconv.DBCollectionNameKey.String(collection),
+		semconv.DBOperationName("insertOne"),
+	)
+
+	ctx, cancel := context.WithTimeout(ctx, writeTimeout)
 	defer cancel()
 
 	_, err = c.Database(clientInstance.DbName).
 		Collection(collection).
 		InsertOne(ctx, u)
+
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return
 }

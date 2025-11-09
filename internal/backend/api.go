@@ -81,7 +81,7 @@ func NewBackendApi() *echo.Echo {
 
 	handlers.AddAppUserHandlers(a, e.Logger)
 
-	handlers.AddHostedAppHandlers(a)
+	handlers.AddHostedAppHandlers(a, e.Logger)
 
 	e.GET("/route-list", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, e.Routes())
@@ -95,7 +95,7 @@ func Start(e *echo.Echo) {
 	cfg := helpers.MustLoadDefaultAppConfig()
 	addr := fmt.Sprintf(":%v", cfg.Server.Port)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer stop()
 	// Start server
 	go func() {

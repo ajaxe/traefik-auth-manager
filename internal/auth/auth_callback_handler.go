@@ -50,6 +50,9 @@ func AuthCallback(cfg appOAuthConfig) echo.HandlerFunc {
 			return echo.ErrBadRequest
 		}
 
+		c.Logger().Infof("access_token - expires_at: %v, expires_in: %v",
+			token.Expiry, token.ExpiresIn)
+
 		idtoken, err := validatedIDToken(token, c, sess, cfg)
 		if err != nil {
 			return err

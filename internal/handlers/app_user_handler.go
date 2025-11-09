@@ -142,7 +142,7 @@ func (h *appUserHandler) userApps(ctx context.Context) (u []*models.AppUser, err
 	if err != nil {
 		return
 	}
-	a, err := db.HostedApplications()
+	a, err := db.NewHostedAppDataAccess()(ctx).HostedApplications()
 	if err != nil {
 		return
 	}
@@ -251,7 +251,8 @@ func (h *appUserHandler) assignUserApp(idParam, appIdParam apiParam) echo.Handle
 		}
 
 		if !has {
-			h, err := db.HostedApplicationByID(appId)
+			h, err := db.NewHostedAppDataAccess()(c.Request().Context()).
+				HostedApplicationByID(appId)
 			if h == nil || err != nil {
 				return helpers.ErrAppGeneric(fmt.Errorf("non-existing hosted app: %s: %v", appId, err))
 			}

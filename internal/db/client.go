@@ -76,7 +76,7 @@ func Ping(ctx context.Context) error {
 	return pingClient(clientInstance.Client, ctx)
 }
 func pingClient(c *mongo.Client, ctx context.Context) error {
-	ctx, span := tracer.Start(ctx, "pingClient")
+	ctx, span := packageTracer(ctx).Start(ctx, "pingClient")
 	defer span.End()
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)

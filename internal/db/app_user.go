@@ -82,7 +82,7 @@ func (c *AppUserDataAccess) InsertAppUser(u *models.AppUser) (id bson.ObjectID, 
 	id = bson.NewObjectID()
 	u.ID = id
 
-	err = insertRecordWithClient(c.client, u, collectionAppUser)
+	err = insertRecordWithClient(c.client, u, collectionAppUser, c.ctx)
 	return
 }
 func (c *AppUserDataAccess) DeleteAppUserByID(id bson.ObjectID) error {

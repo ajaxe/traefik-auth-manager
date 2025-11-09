@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,10 +16,15 @@ import (
 )
 
 type hostedAppHandler struct {
+	logger echo.Logger
+	dbFn   func(context.Context) *db.HostedAppDataAccess
 }
 
-func AddHostedAppHandlers(e *echo.Group) {
-	h := &hostedAppHandler{}
+func AddHostedAppHandlers(e *echo.Group, l echo.Logger) {
+	h := &hostedAppHandler{
+		logger: l,
+		dbFn:   db.NewHostedAppDataAccess(),
+	}
 
 	e.GET("/hosted-apps", h.HostedApps())
 	e.POST("/hosted-apps", h.CreateHostedApps())
@@ -28,7 +34,7 @@ func AddHostedAppHandlers(e *echo.Group) {
 
 func (h *hostedAppHandler) HostedApps() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		d, err := db.HostedApplications()
+		d, err := h.dbFn(c.Request().Context()).HostedApplications()
 		if err != nil {
 			return
 		}
@@ -56,6 +62,8 @@ func (h *hostedAppHandler) CreateHostedApps() echo.HandlerFunc {
 		if err != nil {
 			return err
 		}
+
+		db := h.dbFn(c.Request().Context())
 
 		existing, _ := db.HostedApplicationByServiceToken(d.ServiceToken)
 		if existing != nil && existing.ServiceToken == d.ServiceToken {
@@ -94,7 +102,7 @@ func (h *hostedAppHandler) UpdateHostedApp(p apiParam) echo.HandlerFunc {
 			return err
 		}
 
-		err = db.UpdateHostedApplication(&d)
+		err = h.dbFn(c.Request().Context()).UpdateHostedApplication(&d)
 		if err != nil {
 			return helpers.ErrAppGeneric(err)
 		}
@@ -134,7 +142,7 @@ func (h *hostedAppHandler) DeleteHostedApp(p apiParam) echo.HandlerFunc {
 			return helpers.ErrAppRequired("Host app ID")
 		}
 
-		app, err := db.HostedApplicationByID(i)
+		app, err := h.dbFn(c.Request().Context()).HostedApplicationByID(i)
 		if err != nil {
 			return helpers.ErrAppGeneric(err)
 		}
