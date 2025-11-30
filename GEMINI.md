@@ -52,3 +52,33 @@ All build and run commands are managed via the `Makefile`. The build output is p
 -   **Frontend Components**: UI components are Go structs in `internal/components` that implement the `go-app` rendering logic. They are composed to build pages in `internal/pages`.
 -   **Backend Handlers**: Standard `Echo` handlers are located in `internal/handlers`. They are responsible for API logic and rendering the initial HTML that loads the WASM application.
 -   **Styling**: The application uses Bootstrap. Static assets, including CSS and JS libraries, are located in the `/web` directory and copied to `/tmp/web` during the build.
+
+## 🐍 Running Python Scripts via Docker
+
+Since Python may not be installed on the local Windows machine, and we are using a remote Docker host, use the following workflow to run Python scripts (e.g., for image processing):
+
+1.  **Start a container**:
+    ```powershell
+    docker run -d --name python-runner -w /app --entrypoint tail python:3.9-slim -f /dev/null
+    ```
+
+2.  **Copy files to the container**:
+    ```powershell
+    docker cp ./path/to/script.py python-runner:/app/
+    docker cp ./path/to/input_file python-runner:/app/
+    ```
+
+3.  **Execute the script**:
+    ```powershell
+    docker exec python-runner python script.py
+    ```
+
+4.  **Copy results back**:
+    ```powershell
+    docker cp python-runner:/app/output_file ./path/to/output/
+    ```
+
+5.  **Cleanup**:
+    ```powershell
+    docker rm -f python-runner
+    ```
