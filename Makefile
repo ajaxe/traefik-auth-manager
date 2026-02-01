@@ -17,3 +17,7 @@ build:
 run: build
 	@echo "Running server..."
 	cd ./tmp && ./server.exe
+
+prod:
+	@echo "Building production server..."
+	@docker build . --network=host --tag apogee-dev/traefik-auth-manager:local
