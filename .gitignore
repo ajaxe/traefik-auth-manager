@@ -26,3 +26,4 @@ go.work.sum
 tmp/
 # config file for the go app server.
 config*.yaml
+*.log
