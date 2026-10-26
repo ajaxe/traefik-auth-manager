@@ -7,7 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gorilla/sessions v1.4.0
 	github.com/labstack/echo-contrib v0.50.1
-	github.com/labstack/echo/v4 v4.16.0
+	github.com/labstack/echo/v4 v4.16.2
 	github.com/labstack/gommon v0.5.0
 	github.com/maxence-charriere/go-app/v10 v10.1.11
 	github.com/spf13/viper v1.21.0
